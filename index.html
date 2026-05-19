@@ -23,25 +23,28 @@
                 <h2 class="text-lg font-semibold text-slate-900 border-b border-slate-200 pb-2">Invoice Details</h2>
                 
                 <div>
-                    <label class="block text-xs font-medium uppercase tracking-wider text-slate-500 mb-1">Invoice No.</label>
-                    <input type="text" id="invoiceNo" value="O-Example" class="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500">
+                    <label class="block text-xs font-medium uppercase tracking-wider text-slate-500 mb-1">Invoice No. / Month</label>
+                    <input type="text" id="invoiceNo" value="Current Month" class="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500">
                 </div>
                 
                 <div>
-                    <label class="block text-xs font-medium uppercase tracking-wider text-slate-500 mb-1">Total Amount Due ($)</label>
-                    <input type="number" id="totalAmount" value="150.00" step="0.01" class="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-sm font-semibold text-blue-600 focus:outline-none focus:border-blue-500">
+                    <label class="block text-xs font-medium uppercase tracking-wider text-slate-500 mb-1">Total Amount Due</label>
+                    <input type="number" id="totalAmount" value="0.00" step="0.01" class="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-sm font-semibold text-blue-600 focus:outline-none focus:border-blue-500">
                 </div>
 
                 <div>
                     <label class="block text-xs font-medium uppercase tracking-wider text-slate-500 mb-1">Total Energy Consumption (A) [kW]</label>
-                    <input type="number" id="totalKw" value="450" step="0.1" class="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500">
+                    <input type="number" id="totalKw" value="0" step="0.1" class="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500">
                 </div>
 
-                <div class="pt-4 border-t border-slate-200">
+                <div class="pt-4 border-t border-slate-200 space-y-3">
                     <div class="flex justify-between items-center text-sm">
-                        <span class="text-slate-600 font-medium">Calculated Price per kW:</span>
-                        <span id="pricePerKw" class="font-bold text-indigo-600 text-base">$0.00</span>
+                        <span class="text-slate-600 font-medium">Price per kW:</span>
+                        <span id="pricePerKw" class="font-bold text-indigo-600 text-base">0.0000</span>
                     </div>
+                    <button onclick="copyBillSummary()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium py-2.5 rounded-lg transition shadow-xs cursor-pointer flex items-center justify-center gap-2">
+                        📋 Copy Shareable Summary
+                    </button>
                 </div>
             </div>
 
@@ -71,13 +74,13 @@
                                 <td colspan="2"></td>
                                 <td id="subtotalKw" class="p-3 text-right">0.00</td>
                                 <td id="subtotalPercent" class="p-3 text-right">0%</td>
-                                <td id="subtotalCost" class="p-3 text-right text-blue-600">$0.00</td>
+                                <td id="subtotalCost" class="p-3 text-right text-blue-600">0.00</td>
                             </tr>
                             <tr class="bg-amber-50 font-medium text-amber-900 text-xs">
                                 <td class="p-3">System Excess / Baseline (E)</td>
                                 <td colspan="2"></td>
                                 <td id="excessKw" class="p-3 text-right">0.00 kW</td>
-                                <td colspan="2" class="p-3 text-slate-500 italic text-left">Common area/base load variance distributed proportionately.</td>
+                                <td colspan="2" class="p-3 text-slate-500 italic text-left">Common variance distributed proportionately.</td>
                             </tr>
                         </tfoot>
                     </table>
@@ -87,13 +90,15 @@
     </div>
 
     <script>
-        // Initial list of tenants from your spreadsheet
+        // Adjust tenant list here if needed
         const initialTenants = [
-            { name: "Mama", prev: 1200, curr: 1310 },
-            { name: "Vhal", prev: 950, curr: 1045 },
-            { name: "Liza", prev: 2100, curr: 2220 },
-            { name: "Erwin", prev: 1450, curr: 1530 }
+            { name: "Mama", prev: 0, curr: 0 },
+            { name: "Vhal", prev: 0, curr: 0 },
+            { name: "Liza", prev: 0, curr: 0 },
+            { name: "Erwin", prev: 0, curr: 0 }
         ];
+
+        let summaryText = "";
 
         function initApp() {
             const tbody = document.getElementById("tenantRows");
@@ -112,12 +117,11 @@
                     </td>
                     <td id="net-${idx}" class="p-3 text-right font-mono text-xs text-slate-600">0.00</td>
                     <td id="pct-${idx}" class="p-3 text-right font-mono text-xs text-slate-600">0.0%</td>
-                    <td id="cost-${idx}" class="p-3 text-right font-semibold font-mono text-slate-900">$0.00</td>
+                    <td id="cost-${idx}" class="p-3 text-right font-semibold font-mono text-slate-900">0.00</td>
                 `;
                 tbody.appendChild(row);
             });
 
-            // Listeners for top level inputs to recalculate dynamically
             document.getElementById("totalAmount").addEventListener("input", calculateBill);
             document.getElementById("totalKw").addEventListener("input", calculateBill);
 
@@ -128,62 +132,59 @@
             const totalAmount = parseFloat(document.getElementById("totalAmount").value) || 0;
             const totalKwInvoice = parseFloat(document.getElementById("totalKw").value) || 0;
 
-            // 1. Calculate Price per kW (G)
             const pricePerKw = totalKwInvoice > 0 ? (totalAmount / totalKwInvoice) : 0;
-            document.getElementById("pricePerKw").textContent = `$${pricePerKw.toFixed(4)}`;
+            document.getElementById("pricePerKw").textContent = pricePerKw.toFixed(4);
 
             let subtotalKw = 0;
 
-            // First pass: Calculate individual tenant consumption (C)
             const tenantConsumptions = initialTenants.map((_, idx) => {
                 const prev = parseFloat(document.getElementById(`prev-${idx}`).value) || 0;
                 const curr = parseFloat(document.getElementById(`curr-${idx}`).value) || 0;
-                const net = Math.max(0, curr - prev); // Ensure no negative values
+                const net = Math.max(0, curr - prev);
                 subtotalKw += net;
                 return net;
             });
 
-            // Update subtotal display
             document.getElementById("subtotalKw").textContent = subtotalKw.toFixed(2);
 
-            // Calculate Excess kW (E) = Total Invoice kW - Subtotal Tenant kW
             const excessKw = totalKwInvoice - subtotalKw;
             document.getElementById("excessKw").textContent = `${excessKw.toFixed(2)} kW`;
 
             let accumulatedCost = 0;
             let accumulatedPercent = 0;
+            let breakdownLines = "";
 
-            // Second pass: Calculate percentages, deductions/additions, and costs mirroring sheet math
-            initialTenants.forEach((_, idx) => {
+            initialTenants.forEach((tenant, idx) => {
                 const netKw = tenantConsumptions[idx];
-                
-                // Percent (D) = Tenant Net / Subtotal Tenant kW (B)
                 const pct = subtotalKw > 0 ? (netKw / subtotalKw) : 0;
-                
-                // Proportionate share of the excess baseline power added/deducted
                 const shareOfExcess = pct * excessKw;
-                
-                // Final chargeable kW for payment (H) = Tenant Net + Share of excess
                 const billableKw = netKw + shareOfExcess;
-                
-                // Total amount for payment (H * G)
                 const tenantCost = billableKw * pricePerKw;
 
                 accumulatedCost += tenantCost;
                 accumulatedPercent += pct;
 
-                // Update row values
                 document.getElementById(`net-${idx}`).textContent = netKw.toFixed(2);
                 document.getElementById(`pct-${idx}`).textContent = `${(pct * 100).toFixed(1)}%`;
-                document.getElementById(`cost-${idx}`).textContent = `$${tenantCost.toFixed(2)}`;
+                document.getElementById(`cost-${idx}`).textContent = tenantCost.toFixed(2);
+
+                if(netKw > 0) {
+                    breakdownLines += `• ${tenant.name}: ${tenantCost.toFixed(2)}\n`;
+                }
             });
 
-            // Final bottom calculations
             document.getElementById("subtotalPercent").textContent = `${Math.round(accumulatedPercent * 100)}%`;
-            document.getElementById("subtotalCost").textContent = `$${accumulatedCost.toFixed(2)}`;
+            document.getElementById("subtotalCost").textContent = accumulatedCost.toFixed(2);
+
+            const invNo = document.getElementById("invoiceNo").value;
+            summaryText = `⚡ *Electric Bill Breakdown*\n${invNo}\n\nTotal Bill: ${totalAmount.toFixed(2)}\nTotal Usage: ${totalKwInvoice} kW\n\n*Tenant Shares:*\n${breakdownLines}`;
         }
 
-        // Initialize on windows load
+        function copyBillSummary() {
+            navigator.clipboard.writeText(summaryText);
+            alert("Summary copied to clipboard! You can now paste it directly into an SMS or chat.");
+        }
+
         window.onload = initApp;
     </script>
 </body>
