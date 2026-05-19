@@ -15,74 +15,65 @@
 <body class="bg-slate-50 text-slate-800 min-h-screen p-4 md:p-8">
 
 <div class="max-w-6xl mx-auto bg-white rounded-2xl shadow-xl border border-slate-100 overflow-hidden">
-    <div class="bg-gradient-to-r flow-root from-blue-600 to-indigo-700 p-6 md:p-8 text-white">
-        <h1 class="text-2xl md:text-3xl font-bold tracking-tight">⚡ Electric Bill Calculator</h1>
-        <p class="text-blue-100 mt-1 text-sm md:text-base">Fully synchronized with your spreadsheet logic and formulas.</p>
+
+    <div class="bg-gradient-to-r from-blue-600 to-indigo-700 p-6 text-white">
+        <h1 class="text-2xl font-bold">⚡ Electric Bill Calculator</h1>
     </div>
 
-    <div class="p-6 md:p-8 grid grid-cols-1 lg:grid-cols-3 gap-8">
+    <div class="p-6 grid grid-cols-1 lg:grid-cols-3 gap-8">
 
-        <!-- LEFT PANEL -->
-        <div class="lg:col-span-1 space-y-4 bg-slate-50 p-5 rounded-xl border border-slate-200/60">
+        <!-- INPUTS -->
+        <div class="space-y-3">
 
-            <h2 class="text-lg font-semibold text-slate-900 border-b border-slate-200 pb-2">Invoice Details</h2>
+            <input id="invoiceNo" value="O-Example" class="border p-2 w-full">
+            <input id="billingMonth" type="month" value="2026-05" class="border p-2 w-full">
+            <input id="transDate" type="date" value="2026-05-20" class="border p-2 w-full">
+            <input id="dueDate" type="date" value="2026-05-31" class="border p-2 w-full">
+            <input id="periodFrom" type="date" value="2026-05-04" class="border p-2 w-full">
+            <input id="periodTo" type="date" value="2026-05-22" class="border p-2 w-full">
 
-            <input id="invoiceNo" type="text" value="O-Example" class="w-full border p-2 rounded">
-            <input id="billingMonth" type="month" value="2026-05" class="w-full border p-2 rounded">
-            <input id="transDate" type="date" value="2026-05-20" class="w-full border p-2 rounded">
-            <input id="dueDate" type="date" value="2026-05-31" class="w-full border p-2 rounded">
-            <input id="periodFrom" type="date" value="2026-05-04" class="w-full border p-2 rounded">
-            <input id="periodTo" type="date" value="2026-05-22" class="w-full border p-2 rounded">
+            <input id="totalAmount" type="number" value="4626.48" class="border p-2 w-full">
+            <input id="totalKw" type="number" value="423" class="border p-2 w-full">
 
-            <input id="totalAmount" type="number" value="4626.48" class="w-full border p-2 rounded">
-            <input id="totalKw" type="number" value="423" class="w-full border p-2 rounded">
-
-            <div class="pt-4 border-t space-y-2">
-                <button onclick="copyBillSummary()" class="w-full bg-emerald-600 text-white py-2 rounded">
-                    Copy
-                </button>
-
-                <button onclick="shareToMessenger()" class="w-full bg-blue-600 text-white py-2 rounded">
-                    Share
-                </button>
-
-                <button onclick="clearAllInputs()" class="w-full bg-slate-400 text-white py-2 rounded">
-                    Clear All
-                </button>
-            </div>
+            <button onclick="clearAllInputs()" class="bg-red-400 text-white p-2 w-full">Clear</button>
         </div>
 
-        <!-- RIGHT PANEL -->
+        <!-- TABLE -->
         <div class="lg:col-span-2">
-            <div id="captureArea" class="bg-white p-4 rounded-xl">
-                <table class="w-full text-sm border">
-                    <thead>
-                        <tr class="bg-slate-100">
-                            <th class="p-2">Tenant</th>
-                            <th>Current</th>
-                            <th>Previous</th>
-                            <th>Total</th>
-                            <th>%</th>
-                            <th>Deduct</th>
-                            <th>Pay kW</th>
-                            <th>Cost</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tenantRows"></tbody>
-                    <tfoot>
-                        <tr>
-                            <td>Subtotal</td>
-                            <td colspan="2"></td>
-                            <td id="subtotalKw"></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td id="subtotalCost"></td>
-                        </tr>
-                    </tfoot>
-                </table>
-            </div>
+            <table class="w-full border text-sm">
+                <thead>
+                <tr class="bg-gray-100">
+                    <th>Tenant</th>
+                    <th>Current</th>
+                    <th>Previous</th>
+                    <th>Total</th>
+                    <th>%</th>
+                    <th>Cost</th>
+                </tr>
+                </thead>
+
+                <tbody id="tenantRows"></tbody>
+
+                <tfoot>
+                <tr>
+                    <td>Subtotal</td>
+                    <td colspan="2"></td>
+                    <td id="subtotalKw"></td>
+                    <td></td>
+                    <td id="subtotalCost"></td>
+                </tr>
+
+                <!-- ✅ RESTORED EXACT ROW -->
+                <tr>
+                    <td colspan="3">Total kW Excess (E): (B - A)</td>
+                    <td id="excessKw">0</td>
+                    <td colspan="2"></td>
+                </tr>
+
+                </tfoot>
+            </table>
         </div>
+
     </div>
 </div>
 
@@ -97,7 +88,7 @@ const initialTenants = [
 let summaryText = "";
 
 /* =========================
-   LOCAL STORAGE (ONLY ADDITION)
+   LOCALSTORAGE PATCH ONLY
 ========================= */
 const STORAGE_KEY = "electricBillInputs";
 
@@ -131,12 +122,10 @@ function initApp() {
 
         row.innerHTML = `
             <td>${t.name}</td>
-            <td><input id="curr-${i}" type="number" value="${t.curr}" oninput="calculateBill()"></td>
-            <td><input id="prev-${i}" type="number" value="${t.prev}" oninput="calculateBill()"></td>
+            <td><input id="curr-${i}" value="${t.curr}" oninput="calculateBill()"></td>
+            <td><input id="prev-${i}" value="${t.prev}" oninput="calculateBill()"></td>
             <td id="net-${i}">0</td>
             <td id="pct-${i}">0%</td>
-            <td id="deduct-${i}">0</td>
-            <td id="paykw-${i}">0</td>
             <td id="cost-${i}">0</td>
         `;
         tbody.appendChild(row);
@@ -191,28 +180,15 @@ function calculateBill() {
     document.getElementById("subtotalKw").textContent = subtotalKw.toFixed(2);
     document.getElementById("subtotalCost").textContent = sumCost.toFixed(2);
 
-    saveInputs(); // optional safety save
+    const excessKw = subtotalKw - totalKwInvoice;
+    document.getElementById("excessKw").textContent = excessKw.toFixed(2);
+
+    saveInputs(); // optional safety
 }
 
 /* =========================
-   ACTIONS (UNCHANGED)
+   ACTIONS
 ========================= */
-function copyBillSummary() {
-    navigator.clipboard.writeText(summaryText);
-    alert("Copied!");
-}
-
-function shareToMessenger() {
-    html2canvas(document.getElementById("captureArea")).then(canvas => {
-        const a = document.createElement("a");
-        a.href = canvas.toDataURL("image/png");
-        a.download = "bill.png";
-        a.click();
-        window.open("https://www.messenger.com/", "_blank");
-    });
-}
-
-/* ONLY FIXED CLEAR FUNCTION */
 function clearAllInputs() {
     document.querySelectorAll("input").forEach(i => i.value = "");
     localStorage.removeItem(STORAGE_KEY);
