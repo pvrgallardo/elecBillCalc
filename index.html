@@ -30,7 +30,7 @@
                     </div>
                     <div>
                         <label class="block text-[10px] font-medium uppercase tracking-wider text-slate-500 mb-1">Billing Month</label>
-                        <input type="text" id="billingMonth" value="May 2026" class="w-full bg-white border border-slate-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-blue-500">
+                        <input type="month" id="billingMonth" value="2026-05" class="w-full bg-white border border-slate-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-blue-500">
                     </div>
                 </div>
 
@@ -148,10 +148,10 @@
                 row.innerHTML = `
                     <td class="p-3 font-medium text-slate-900">${tenant.name}</td>
                     <td class="p-1.5">
-                        <input type="number" value="${tenant.curr}" id="curr-${idx}" oninput="calculateBill()" class="w-full bg-slate-50 border border-slate-200 rounded px-2 py-1 text-xs focus:bg-white focus:border-blue-400 focus:outline-none">
+                        <input type="number" value="${tenant.curr}" id="curr-${idx}" oninput="calculateBill()" class="w-full bg-slate-50 border border-slate-200 rounded px-2 py-1 text-xs focus:bg-white focus:outline-none focus:border-blue-400">
                     </td>
                     <td class="p-1.5">
-                        <input type="number" value="${tenant.prev}" id="prev-${idx}" oninput="calculateBill()" class="w-full bg-slate-50 border border-slate-200 rounded px-2 py-1 text-xs focus:bg-white focus:border-blue-400 focus:outline-none">
+                        <input type="number" value="${tenant.prev}" id="prev-${idx}" oninput="calculateBill()" class="w-full bg-slate-50 border border-slate-200 rounded px-2 py-1 text-xs focus:bg-white focus:outline-none focus:border-blue-400">
                     </td>
                     <td id="net-${idx}" class="p-3 text-right font-mono text-xs text-slate-600">0.00</td>
                     <td id="pct-${idx}" class="p-3 text-right font-mono text-xs text-slate-600">0.0%</td>
@@ -165,7 +165,7 @@
             document.getElementById("totalAmount").addEventListener("input", calculateBill);
             document.getElementById("totalKw").addEventListener("input", calculateBill);
             document.getElementById("invoiceNo").addEventListener("input", calculateBill);
-            document.getElementById("billingMonth").addEventListener("input", calculateBill);
+            document.getElementById("billingMonth").addEventListener("input", formatBillingMonthDisplay);
             document.getElementById("transDate").addEventListener("input", calculateBill);
             document.getElementById("dueDate").addEventListener("input", calculateBill);
             document.getElementById("periodFrom").addEventListener("input", calculateBill);
@@ -174,12 +174,32 @@
             calculateBill();
         }
 
+        // Format month input to display as "Month Year" for summary
+        function formatBillingMonthDisplay() {
+            const monthInput = document.getElementById("billingMonth").value; // Format: YYYY-MM
+            if (monthInput) {
+                const [year, month] = monthInput.split('-');
+                const date = new Date(year, month - 1);
+                const monthName = date.toLocaleString('default', { month: 'long', year: 'numeric' });
+                // Keep the input as YYYY-MM but update calculations with formatted version
+                calculateBill();
+            }
+        }
+
         // Simple helper to cleanly format standard YYYY-MM-DD input strings back into user-friendly text summaries
         function formatDateString(dateStr) {
             if(!dateStr) return '';
             const parts = dateStr.split('-');
             if(parts.length !== 3) return dateStr;
             return `${parts[1]}/${parts[2]}/${parts[0]}`;
+        }
+
+        // Format month input (YYYY-MM) to "Month Year" format
+        function formatMonthString(monthStr) {
+            if(!monthStr) return '';
+            const [year, month] = monthStr.split('-');
+            const date = new Date(year, month - 1);
+            return date.toLocaleString('default', { month: 'long', year: 'numeric' });
         }
 
         function calculateBill() {
@@ -238,12 +258,12 @@
             document.getElementById("subtotalCost").textContent = sumCost.toFixed(2);
 
             const invNo = document.getElementById("invoiceNo").value;
-            const bMonth = document.getElementById("billingMonth").value;
+            const bMonth = formatMonthString(document.getElementById("billingMonth").value);
             const dDate = formatDateString(document.getElementById("dueDate").value);
             const pFrom = formatDateString(document.getElementById("periodFrom").value);
             const pTo = formatDateString(document.getElementById("periodTo").value);
             
-            summaryText = `⚡ *Electric Bill Breakdown*\n📝 Invoice: ${invNo} (${bMonth})\n📅 Period: ${pFrom} to ${pTo}\n📅 Due Date: ${dDate}\n\n💳 Total Bill: ${totalAmount.toFixed(2)}\n\n${breakdownLines}`;
+            summaryText = `⚡ *Electric Bill Breakdown*\n📝 Invoice: ${invNo} (${bMonth})\n📅 Period: ${pFrom} to ${pTo}\n📅 Due Date: ${dDate}\n\n💳 Total Bill: ${totalAmount.toFixed(2)}\n⚡ Total Consumption: ${totalKwInvoice} kW\n💰 Price/kW: ${pricePerKw.toFixed(4)}\n\n${breakdownLines}`;
         }
 
         function copyBillSummary() {
@@ -272,7 +292,7 @@
         function clearAllInputs() {
             // Clear invoice details
             document.getElementById("invoiceNo").value = "O-Example";
-            document.getElementById("billingMonth").value = "May 2026";
+            document.getElementById("billingMonth").value = "2026-05";
             document.getElementById("transDate").value = "2026-05-20";
             document.getElementById("dueDate").value = "2026-05-31";
             document.getElementById("periodFrom").value = "2026-05-04";
