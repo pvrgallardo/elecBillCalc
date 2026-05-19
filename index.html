@@ -30,7 +30,7 @@
                     </div>
                     <div>
                         <label class="block text-[10px] font-medium uppercase tracking-wider text-slate-500 mb-1">Billing Month</label>
-                        <input type="text" id="billingMonth" value="May 2026" class="w-full bg-white border border-slate-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-blue-500">
+                        <input type="month" id="billingMonth" value="2026-05" class="w-full bg-white border border-slate-300 rounded-lg px-2 py-1.5 text-sm focus:outline-none focus:border-blue-500">
                     </div>
                 </div>
 
@@ -63,7 +63,7 @@
 
                 <div>
                     <label class="block text-[10px] font-medium uppercase tracking-wider text-slate-500 mb-1">Total Energy Consumption (A) [kW]</label>
-                    <input type="number" id="totalKw" value="423" step="0.1" class="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500">
+                    <input type="number" id="totalKw" value="423" step="0.1" class="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-sm font-semibold focus:outline-none focus:border-blue-500">
                 </div>
 
                 <div class="pt-4 border-t border-slate-200 space-y-2">
@@ -170,7 +170,7 @@
             calculateBill();
         }
 
-        // Simple helper to cleanly format standard YYYY-MM-DD input strings back into user-friendly text summaries
+        // Helper to turn YYYY-MM-DD into MM/DD/YYYY
         function formatDateString(dateStr) {
             if(!dateStr) return '';
             const parts = dateStr.split('-');
@@ -178,94 +178,9 @@
             return `${parts[1]}/${parts[2]}/${parts[0]}`;
         }
 
-        function calculateBill() {
-            const totalAmount = parseFloat(document.getElementById("totalAmount").value) || 0;
-            const totalKwInvoice = parseFloat(document.getElementById("totalKw").value) || 0;
-
-            const pricePerKw = totalKwInvoice > 0 ? (totalAmount / totalKwInvoice) : 0;
-            document.getElementById("pricePerKw").textContent = pricePerKw.toFixed(4);
-
-            let subtotalKw = 0;
-
-            const tenantConsumptions = initialTenants.map((_, idx) => {
-                const prev = parseFloat(document.getElementById(`prev-${idx}`).value) || 0;
-                const curr = parseFloat(document.getElementById(`curr-${idx}`).value) || 0;
-                const net = Math.max(0, curr - prev);
-                subtotalKw += net;
-                return net;
-            });
-
-            document.getElementById("subtotalKw").textContent = subtotalKw.toFixed(2);
-
-            const excessKw = subtotalKw - totalKwInvoice;
-            document.getElementById("excessKw").textContent = excessKw.toFixed(2);
-
-            let sumDeduct = 0;
-            let sumPaymentKw = 0;
-            let sumCost = 0;
-            let sumPercent = 0;
-            let breakdownLines = "";
-
-            initialTenants.forEach((tenant, idx) => {
-                const netKw = tenantConsumptions[idx];
-                const pct = subtotalKw > 0 ? (netKw / subtotalKw) : 0;
-                const deduct = excessKw * pct;
-                const paymentKw = netKw - deduct;
-                const tenantCost = paymentKw * pricePerKw;
-
-                sumDeduct += deduct;
-                sumPaymentKw += paymentKw;
-                sumCost += tenantCost;
-                sumPercent += pct;
-
-                document.getElementById(`net-${idx}`).textContent = netKw.toFixed(2);
-                document.getElementById(`pct-${idx}`).textContent = `${(pct * 100).toFixed(1)}%`;
-                document.getElementById(`deduct-${idx}`).textContent = deduct.toFixed(2);
-                document.getElementById(`paykw-${idx}`).textContent = paymentKw.toFixed(2);
-                document.getElementById(`cost-${idx}`).textContent = tenantCost.toFixed(2);
-
-                if (netKw > 0) {
-                    breakdownLines += `• *${tenant.name}*:\n  Usage: ${netKw.toFixed(2)} kW (${(pct*100).toFixed(1)}%)\n  Final Share: *${tenantCost.toFixed(2)}*\n\n`;
-                }
-            });
-
-            document.getElementById("subtotalDeduct").textContent = sumDeduct.toFixed(2);
-            document.getElementById("subtotalPaymentKw").textContent = sumPaymentKw.toFixed(2);
-            document.getElementById("subtotalCost").textContent = sumCost.toFixed(2);
-
-            const invNo = document.getElementById("invoiceNo").value;
-            const bMonth = document.getElementById("billingMonth").value;
-            const dDate = formatDateString(document.getElementById("dueDate").value);
-            const pFrom = formatDateString(document.getElementById("periodFrom").value);
-            const pTo = formatDateString(document.getElementById("periodTo").value);
-            
-            summaryText = `⚡ *Electric Bill Breakdown*\n📝 Invoice: ${invNo} (${bMonth})\n📅 Period: ${pFrom} to ${pTo}\n📅 Due Date: ${dDate}\n\n💳 Total Bill: ${totalAmount.toFixed(2)}\n🔋 Total Master Consumption: ${totalKwInvoice.toFixed(2)} kW\n\n*Tenant Share Breakdown:*\n\n${breakdownLines}Please settle accordingly. Thank you!`;
-        }
-
-        function copyBillSummary() {
-            navigator.clipboard.writeText(summaryText);
-            alert("Text summary copied to clipboard!");
-        }
-
-        function shareToMessenger() {
-            const element = document.getElementById('captureArea');
-            const billingMonth = document.getElementById('billingMonth').value || 'bill';
-            
-            html2canvas(element, { scale: 2, useCORS: true }).then(canvas => {
-                const image = canvas.toDataURL("image/png");
-                const link = document.createElement('a');
-                link.download = `electric-breakdown-${billingMonth.replace(/\s+/g, '-').toLowerCase()}.png`;
-                link.href = image;
-                link.click();
-                
-                setTimeout(() => {
-                    alert("Image saved to your device! Messenger will open now—simply pick a chat and attach your downloaded screenshot.");
-                    window.open("https://www.messenger.com/", "_blank");
-                }, 500);
-            });
-        }
-
-         window.onload = initApp;
-    </script>
-</body>
-</html>
+        // Helper to clean YYYY-MM into "Month YYYY" (e.g., 2026-05 -> May 2026)
+        function formatMonthString(monthStr) {
+            if(!monthStr) return '';
+            const parts = monthStr.split('-');
+            if(parts.length !== 2) return monthStr;
+            const months =
