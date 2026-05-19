@@ -16,24 +16,24 @@
 
 <div class="max-w-6xl mx-auto bg-white rounded-2xl shadow-xl border border-slate-100 overflow-hidden">
 
-    <div class="bg-gradient-to-r from-blue-600 to-indigo-700 p-6 text-white">
-        <h1 class="text-2xl font-bold">⚡ Electric Bill Calculator</h1>
+    <div class="bg-gradient-to-r from-blue-600 to-indigo-700 p-6 md:p-8 text-white">
+        <h1 class="text-2xl md:text-3xl font-bold tracking-tight">⚡ Electric Bill Calculator</h1>
+        <p class="text-blue-100 mt-1 text-sm md:text-base">Fully synchronized with your spreadsheet logic and formulas.</p>
     </div>
 
-    <div class="p-6 grid grid-cols-1 lg:grid-cols-3 gap-8">
+    <div class="p-6 md:p-8 grid grid-cols-1 lg:grid-cols-3 gap-8">
 
         <!-- INPUTS -->
-        <div class="space-y-3">
+        <div class="lg:col-span-1 space-y-3">
+            <input id="invoiceNo" type="text" class="border p-2 w-full">
+            <input id="billingMonth" type="month" class="border p-2 w-full">
+            <input id="transDate" type="date" class="border p-2 w-full">
+            <input id="dueDate" type="date" class="border p-2 w-full">
+            <input id="periodFrom" type="date" class="border p-2 w-full">
+            <input id="periodTo" type="date" class="border p-2 w-full">
 
-            <input id="invoiceNo" value="O-Example" class="border p-2 w-full">
-            <input id="billingMonth" type="month" value="2026-05" class="border p-2 w-full">
-            <input id="transDate" type="date" value="2026-05-20" class="border p-2 w-full">
-            <input id="dueDate" type="date" value="2026-05-31" class="border p-2 w-full">
-            <input id="periodFrom" type="date" value="2026-05-04" class="border p-2 w-full">
-            <input id="periodTo" type="date" value="2026-05-22" class="border p-2 w-full">
-
-            <input id="totalAmount" type="number" value="4626.48" class="border p-2 w-full">
-            <input id="totalKw" type="number" value="423" class="border p-2 w-full">
+            <input id="totalAmount" type="number" class="border p-2 w-full">
+            <input id="totalKw" type="number" class="border p-2 w-full">
 
             <button onclick="clearAllInputs()" class="bg-red-400 text-white p-2 w-full">Clear</button>
         </div>
@@ -51,7 +51,6 @@
                     <th>Cost</th>
                 </tr>
                 </thead>
-
                 <tbody id="tenantRows"></tbody>
 
                 <tfoot>
@@ -63,13 +62,11 @@
                     <td id="subtotalCost"></td>
                 </tr>
 
-                <!-- ✅ RESTORED EXACT ROW -->
                 <tr>
                     <td colspan="3">Total kW Excess (E): (B - A)</td>
                     <td id="excessKw">0</td>
                     <td colspan="2"></td>
                 </tr>
-
                 </tfoot>
             </table>
         </div>
@@ -88,7 +85,7 @@ const initialTenants = [
 let summaryText = "";
 
 /* =========================
-   LOCALSTORAGE PATCH ONLY
+   LOCALSTORAGE (ONLY ADDITION)
 ========================= */
 const STORAGE_KEY = "electricBillInputs";
 
@@ -111,7 +108,7 @@ function loadInputs() {
 }
 
 /* =========================
-   INIT (UNCHANGED LOGIC)
+   INIT (UNCHANGED)
 ========================= */
 function initApp() {
     const tbody = document.getElementById("tenantRows");
@@ -122,8 +119,8 @@ function initApp() {
 
         row.innerHTML = `
             <td>${t.name}</td>
-            <td><input id="curr-${i}" value="${t.curr}" oninput="calculateBill()"></td>
-            <td><input id="prev-${i}" value="${t.prev}" oninput="calculateBill()"></td>
+            <td><input id="curr-${i}" type="number" oninput="calculateBill()"></td>
+            <td><input id="prev-${i}" type="number" oninput="calculateBill()"></td>
             <td id="net-${i}">0</td>
             <td id="pct-${i}">0%</td>
             <td id="cost-${i}">0</td>
@@ -131,12 +128,12 @@ function initApp() {
         tbody.appendChild(row);
     });
 
-    loadInputs(); // ✅ ONLY ADDITION
+    loadInputs(); // ✅ RESTORE VALUES
 
     document.querySelectorAll("input").forEach(i => {
         i.addEventListener("input", () => {
             calculateBill();
-            saveInputs(); // ✅ ONLY ADDITION
+            saveInputs(); // ✅ SAVE ON CHANGE
         });
     });
 
@@ -144,13 +141,13 @@ function initApp() {
 }
 
 /* =========================
-   YOUR ORIGINAL CALCULATION (UNCHANGED)
+   CALCULATION (UNCHANGED)
 ========================= */
 function calculateBill() {
     const totalAmount = parseFloat(document.getElementById("totalAmount").value) || 0;
-    const totalKwInvoice = parseFloat(document.getElementById("totalKw").value) || 0;
+    const totalKw = parseFloat(document.getElementById("totalKw").value) || 0;
 
-    const pricePerKw = totalKwInvoice ? totalAmount / totalKwInvoice : 0;
+    const pricePerKw = totalKw ? totalAmount / totalKw : 0;
 
     let subtotalKw = 0;
     const nets = [];
@@ -158,6 +155,7 @@ function calculateBill() {
     initialTenants.forEach((_, i) => {
         const prev = parseFloat(document.getElementById(`prev-${i}`).value) || 0;
         const curr = parseFloat(document.getElementById(`curr-${i}`).value) || 0;
+
         const net = Math.max(0, curr - prev);
         nets.push(net);
         subtotalKw += net;
@@ -180,19 +178,18 @@ function calculateBill() {
     document.getElementById("subtotalKw").textContent = subtotalKw.toFixed(2);
     document.getElementById("subtotalCost").textContent = sumCost.toFixed(2);
 
-    const excessKw = subtotalKw - totalKwInvoice;
-    document.getElementById("excessKw").textContent = excessKw.toFixed(2);
+    document.getElementById("excessKw").textContent =
+        (subtotalKw - totalKw).toFixed(2);
 
-    saveInputs(); // optional safety
+    saveInputs(); // extra safety
 }
 
 /* =========================
-   ACTIONS
+   CLEAR FIX
 ========================= */
 function clearAllInputs() {
     document.querySelectorAll("input").forEach(i => i.value = "");
     localStorage.removeItem(STORAGE_KEY);
-    calculateBill();
 }
 
 window.onload = initApp;
