@@ -110,7 +110,7 @@
                                     <td class="p-3">subTotal (B)</td>
                                     <td colspan="2"></td>
                                     <td id="subtotalKw" class="p-3 text-right font-mono">0.00</td>
-                                    <td id="subtotalPercent" class="p-3 text-right font-mono">100%</td>
+                                    <td id="subtotalPercent" class="p-3 text-right font-mono">0%</td>
                                     <td id="subtotalDeduct" class="p-3 text-right font-mono">0.00</td>
                                     <td id="subtotalPaymentKw" class="p-3 text-right font-mono">0.00</td>
                                     <td id="subtotalCost" class="p-3 text-right text-blue-600 font-mono">0.00</td>
@@ -217,6 +217,7 @@
             });
 
             document.getElementById("subtotalCost").textContent = sumCost.toFixed(2);
+            document.getElementById("subtotalPercent").textContent = `${(sumPercent * 100).toFixed(1)}%`;
 
             const invNo = document.getElementById("invoiceNo").value;
             const bMonth = document.getElementById("billingMonth").value;
