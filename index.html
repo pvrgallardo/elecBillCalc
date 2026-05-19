@@ -76,8 +76,12 @@
                         📋 Copy Text Summary
                     </button>
                     
-                    <button onclick="shareToMessenger()" class="w-full bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium py-2 rounded-lg transition cursor-pointer flex items-center justify-center gap-2 shadow-xs">
+                    <button onclick="shareToMessenger()" class="w-full bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium py-2 rounded-lg transition cursor-pointer flex items-center justify-center gap-2">
                         📸 Save Image & Open Messenger
+                    </button>
+
+                    <button onclick="clearAllInputs()" class="w-full bg-slate-400 hover:bg-slate-500 text-white text-sm font-medium py-2 rounded-lg transition cursor-pointer flex items-center justify-center gap-2">
+                        🔄 Clear All
                     </button>
                 </div>
             </div>
@@ -144,10 +148,10 @@
                 row.innerHTML = `
                     <td class="p-3 font-medium text-slate-900">${tenant.name}</td>
                     <td class="p-1.5">
-                        <input type="number" value="${tenant.curr}" id="curr-${idx}" oninput="calculateBill()" class="w-full bg-slate-50 border border-slate-200 rounded px-2 py-1 text-xs focus:bg-white focus:border-blue-500 focus:outline-none">
+                        <input type="number" value="${tenant.curr}" id="curr-${idx}" oninput="calculateBill()" class="w-full bg-slate-50 border border-slate-200 rounded px-2 py-1 text-xs focus:bg-white focus:border-blue-400 focus:outline-none">
                     </td>
                     <td class="p-1.5">
-                        <input type="number" value="${tenant.prev}" id="prev-${idx}" oninput="calculateBill()" class="w-full bg-slate-50 border border-slate-200 rounded px-2 py-1 text-xs focus:bg-white focus:border-blue-500 focus:outline-none">
+                        <input type="number" value="${tenant.prev}" id="prev-${idx}" oninput="calculateBill()" class="w-full bg-slate-50 border border-slate-200 rounded px-2 py-1 text-xs focus:bg-white focus:border-blue-400 focus:outline-none">
                     </td>
                     <td id="net-${idx}" class="p-3 text-right font-mono text-xs text-slate-600">0.00</td>
                     <td id="pct-${idx}" class="p-3 text-right font-mono text-xs text-slate-600">0.0%</td>
@@ -239,7 +243,7 @@
             const pFrom = formatDateString(document.getElementById("periodFrom").value);
             const pTo = formatDateString(document.getElementById("periodTo").value);
             
-            summaryText = `⚡ *Electric Bill Breakdown*\n📝 Invoice: ${invNo} (${bMonth})\n📅 Period: ${pFrom} to ${pTo}\n📅 Due Date: ${dDate}\n\n💳 Total Bill: ${totalAmount.toFixed(2)}\n🔋 Total Master Consumption: ${totalKwInvoice.toFixed(2)} kW\n\n*Tenant Share Breakdown:*\n\n${breakdownLines}Please settle accordingly. Thank you!`;
+            summaryText = `⚡ *Electric Bill Breakdown*\n📝 Invoice: ${invNo} (${bMonth})\n📅 Period: ${pFrom} to ${pTo}\n📅 Due Date: ${dDate}\n\n💳 Total Bill: ${totalAmount.toFixed(2)}\n\n${breakdownLines}`;
         }
 
         function copyBillSummary() {
@@ -263,6 +267,27 @@
                     window.open("https://www.messenger.com/", "_blank");
                 }, 500);
             });
+        }
+
+        function clearAllInputs() {
+            // Clear invoice details
+            document.getElementById("invoiceNo").value = "O-Example";
+            document.getElementById("billingMonth").value = "May 2026";
+            document.getElementById("transDate").value = "2026-05-20";
+            document.getElementById("dueDate").value = "2026-05-31";
+            document.getElementById("periodFrom").value = "2026-05-04";
+            document.getElementById("periodTo").value = "2026-05-22";
+            document.getElementById("totalAmount").value = "4626.48";
+            document.getElementById("totalKw").value = "423";
+
+            // Clear tenant inputs
+            initialTenants.forEach((tenant, idx) => {
+                document.getElementById(`curr-${idx}`).value = tenant.curr;
+                document.getElementById(`prev-${idx}`).value = tenant.prev;
+            });
+
+            // Recalculate to update the table
+            calculateBill();
         }
 
          window.onload = initApp;
