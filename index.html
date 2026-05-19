@@ -148,10 +148,10 @@
                 row.innerHTML = `
                     <td class="p-3 font-medium text-slate-900">${tenant.name}</td>
                     <td class="p-1.5">
-                        <input type="number" value="${tenant.curr}" id="curr-${idx}" oninput="calculateBill()" class="w-full bg-slate-50 border border-slate-200 rounded px-2 py-1 text-xs focus:bg-white focus:outline-none focus:border-blue-400">
+                        <input type="number" value="${tenant.curr}" id="curr-${idx}" oninput="calculateBill()" class="w-full bg-slate-50 border border-slate-200 rounded px-2 py-1 text-xs focus:bg-white focus:outline-none focus:border-blue-500">
                     </td>
                     <td class="p-1.5">
-                        <input type="number" value="${tenant.prev}" id="prev-${idx}" oninput="calculateBill()" class="w-full bg-slate-50 border border-slate-200 rounded px-2 py-1 text-xs focus:bg-white focus:outline-none focus:border-blue-400">
+                        <input type="number" value="${tenant.prev}" id="prev-${idx}" oninput="calculateBill()" class="w-full bg-slate-50 border border-slate-200 rounded px-2 py-1 text-xs focus:bg-white focus:outline-none focus:border-blue-500">
                     </td>
                     <td id="net-${idx}" class="p-3 text-right font-mono text-xs text-slate-600">0.00</td>
                     <td id="pct-${idx}" class="p-3 text-right font-mono text-xs text-slate-600">0.0%</td>
@@ -263,7 +263,7 @@
             const pFrom = formatDateString(document.getElementById("periodFrom").value);
             const pTo = formatDateString(document.getElementById("periodTo").value);
             
-            summaryText = `⚡ *Electric Bill Breakdown*\n📝 Invoice: ${invNo} (${bMonth})\n📅 Period: ${pFrom} to ${pTo}\n📅 Due Date: ${dDate}\n\n💳 Total Bill: ${totalAmount.toFixed(2)}\n⚡ Total Consumption: ${totalKwInvoice} kW\n💰 Price/kW: ${pricePerKw.toFixed(4)}\n\n${breakdownLines}`;
+            summaryText = `⚡ *Electric Bill Breakdown*\n📝 Invoice: ${invNo} (${bMonth})\n📅 Period: ${pFrom} to ${pTo}\n📅 Due Date: ${dDate}\n\n💳 Total Bill: ${totalAmount.toFixed(2)}\n📊 Total Consumption: ${totalKwInvoice} kW\n💰 Price per kW: ${pricePerKw.toFixed(4)}\n\n${breakdownLines}`;
         }
 
         function copyBillSummary() {
@@ -290,20 +290,20 @@
         }
 
         function clearAllInputs() {
-            // Clear invoice details
-            document.getElementById("invoiceNo").value = "O-Example";
-            document.getElementById("billingMonth").value = "2026-05";
-            document.getElementById("transDate").value = "2026-05-20";
-            document.getElementById("dueDate").value = "2026-05-31";
-            document.getElementById("periodFrom").value = "2026-05-04";
-            document.getElementById("periodTo").value = "2026-05-22";
-            document.getElementById("totalAmount").value = "4626.48";
-            document.getElementById("totalKw").value = "423";
+            // Clear all invoice details
+            document.getElementById("invoiceNo").value = "";
+            document.getElementById("billingMonth").value = "";
+            document.getElementById("transDate").value = "";
+            document.getElementById("dueDate").value = "";
+            document.getElementById("periodFrom").value = "";
+            document.getElementById("periodTo").value = "";
+            document.getElementById("totalAmount").value = "";
+            document.getElementById("totalKw").value = "";
 
-            // Clear tenant inputs
+            // Clear all tenant inputs
             initialTenants.forEach((tenant, idx) => {
-                document.getElementById(`curr-${idx}`).value = tenant.curr;
-                document.getElementById(`prev-${idx}`).value = tenant.prev;
+                document.getElementById(`curr-${idx}`).value = "";
+                document.getElementById(`prev-${idx}`).value = "";
             });
 
             // Recalculate to update the table
