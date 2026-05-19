@@ -138,6 +138,54 @@
 
         let summaryText = "";
 
+        function saveToLocalStorage() {
+            const data = {
+                invoiceNo: document.getElementById("invoiceNo").value,
+                billingMonth: document.getElementById("billingMonth").value,
+                transDate: document.getElementById("transDate").value,
+                dueDate: document.getElementById("dueDate").value,
+                periodFrom: document.getElementById("periodFrom").value,
+                periodTo: document.getElementById("periodTo").value,
+                totalAmount: document.getElementById("totalAmount").value,
+                totalKw: document.getElementById("totalKw").value,
+                tenants: {}
+            };
+
+            // Save tenant data
+            initialTenants.forEach((_, idx) => {
+                data.tenants[idx] = {
+                    current: document.getElementById(`curr-${idx}`).value,
+                    previous: document.getElementById(`prev-${idx}`).value
+                };
+            });
+
+            localStorage.setItem("billCalcData", JSON.stringify(data));
+        }
+
+        function loadFromLocalStorage() {
+            const saved = localStorage.getItem("billCalcData");
+            if (saved) {
+                const data = JSON.parse(saved);
+                
+                document.getElementById("invoiceNo").value = data.invoiceNo || "";
+                document.getElementById("billingMonth").value = data.billingMonth || "";
+                document.getElementById("transDate").value = data.transDate || "";
+                document.getElementById("dueDate").value = data.dueDate || "";
+                document.getElementById("periodFrom").value = data.periodFrom || "";
+                document.getElementById("periodTo").value = data.periodTo || "";
+                document.getElementById("totalAmount").value = data.totalAmount || "";
+                document.getElementById("totalKw").value = data.totalKw || "";
+
+                // Load tenant data
+                initialTenants.forEach((_, idx) => {
+                    if (data.tenants[idx]) {
+                        document.getElementById(`curr-${idx}`).value = data.tenants[idx].current || "";
+                        document.getElementById(`prev-${idx}`).value = data.tenants[idx].previous || "";
+                    }
+                });
+            }
+        }
+
         function initApp() {
             const tbody = document.getElementById("tenantRows");
             tbody.innerHTML = "";
@@ -148,10 +196,10 @@
                 row.innerHTML = `
                     <td class="p-3 font-medium text-slate-900">${tenant.name}</td>
                     <td class="p-1.5">
-                        <input type="number" id="curr-${idx}" oninput="calculateBill()" class="w-full bg-slate-50 border border-slate-200 rounded px-2 py-1 text-xs focus:bg-white focus:outline-none focus:border-blue-500">
+                        <input type="number" id="curr-${idx}" oninput="calculateBill(); saveToLocalStorage();" class="w-full bg-slate-50 border border-slate-200 rounded px-2 py-1 text-xs focus:bg-white focus:outline-none focus:border-blue-400">
                     </td>
                     <td class="p-1.5">
-                        <input type="number" id="prev-${idx}" oninput="calculateBill()" class="w-full bg-slate-50 border border-slate-200 rounded px-2 py-1 text-xs focus:bg-white focus:outline-none focus:border-blue-500">
+                        <input type="number" id="prev-${idx}" oninput="calculateBill(); saveToLocalStorage();" class="w-full bg-slate-50 border border-slate-200 rounded px-2 py-1 text-xs focus:bg-white focus:outline-none focus:border-blue-400">
                     </td>
                     <td id="net-${idx}" class="p-3 text-right font-mono text-xs text-slate-600">0.00</td>
                     <td id="pct-${idx}" class="p-3 text-right font-mono text-xs text-slate-600">0.0%</td>
@@ -162,15 +210,18 @@
                 tbody.appendChild(row);
             });
 
-            document.getElementById("totalAmount").addEventListener("input", calculateBill);
-            document.getElementById("totalKw").addEventListener("input", calculateBill);
-            document.getElementById("invoiceNo").addEventListener("input", calculateBill);
-            document.getElementById("billingMonth").addEventListener("input", calculateBill);
-            document.getElementById("transDate").addEventListener("input", calculateBill);
-            document.getElementById("dueDate").addEventListener("input", calculateBill);
-            document.getElementById("periodFrom").addEventListener("input", calculateBill);
-            document.getElementById("periodTo").addEventListener("input", calculateBill);
+            // Update event listeners to include saveToLocalStorage
+            document.getElementById("totalAmount").addEventListener("input", () => { calculateBill(); saveToLocalStorage(); });
+            document.getElementById("totalKw").addEventListener("input", () => { calculateBill(); saveToLocalStorage(); });
+            document.getElementById("invoiceNo").addEventListener("input", () => { calculateBill(); saveToLocalStorage(); });
+            document.getElementById("billingMonth").addEventListener("input", () => { calculateBill(); saveToLocalStorage(); });
+            document.getElementById("transDate").addEventListener("input", () => { calculateBill(); saveToLocalStorage(); });
+            document.getElementById("dueDate").addEventListener("input", () => { calculateBill(); saveToLocalStorage(); });
+            document.getElementById("periodFrom").addEventListener("input", () => { calculateBill(); saveToLocalStorage(); });
+            document.getElementById("periodTo").addEventListener("input", () => { calculateBill(); saveToLocalStorage(); });
 
+            // Load saved data before calculating
+            loadFromLocalStorage();
             calculateBill();
         }
 
@@ -249,6 +300,7 @@ Due: ${dDate}`;
 
         function clearAllInputs() {
             document.querySelectorAll("input").forEach(i => i.value = "");
+            localStorage.removeItem("billCalcData");
         }
 
         window.onload = initApp;
