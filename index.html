@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Electric Bill Calculator</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html-to-image/1.11.11/html-to-image.min.js"></script>
     <style>
             @import url('https://fonts.googleapis.com/css2?family=Inter:wght=300;400;500;600;700&display=swap');
             body { font-family: 'Inter', sans-serif; }
@@ -296,10 +296,38 @@ Due: ${dDate}`;
             alert("Text copied!");
         }
 
-        function saveInvoiceScreenshot() {
-            // Triggers the browser's native print layout to let you save it perfectly
-            window.print();
-        }
+function saveInvoiceScreenshot() {
+    const elementToCapture = document.getElementById("captureArea");
+
+    if (!elementToCapture) {
+        alert("Error: Capture area not found.");
+        return;
+    }
+
+    // Capture the element directly as a clean PNG image stream
+    htmlToImage.toPng(elementToCapture, { 
+        quality: 0.95,
+        backgroundColor: '#ffffff' 
+    })
+    .then(function (dataUrl) {
+        // Create an automated download prompt
+        const downloadLink = document.createElement('a');
+        
+        // Pull the custom invoice number if available to name the file dynamically
+        const invNo = document.getElementById("invoiceNo").value || "summary";
+        downloadLink.download = `electric-bill-invoice-${invNo}.png`;
+        downloadLink.href = dataUrl;
+        
+        // Trigger the image download to your computer
+        document.body.appendChild(downloadLink);
+        downloadLink.click();
+        document.body.removeChild(downloadLink);
+    })
+    .catch(function (error) {
+        console.error('Screenshot generation crashed:', error);
+        alert('Could not capture screenshot. Try using the "Copy Text Summary" instead!');
+    });
+}
  
         function clearAllInputs() {
             document.querySelectorAll("input").forEach(i => i.value = "");
