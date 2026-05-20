@@ -297,15 +297,17 @@ function shareToMessenger() {
         return;
     }
 
-    // 2. Convert the HTML elements into a canvas snapshot safely
+    // CRITICAL BYPASS: Open Messenger immediately on user click so the browser doesn't block it!
+    const messengerWindow = window.open("https://www.messenger.com/", "_blank");
+
+    // 2. Convert the HTML elements into a canvas snapshot safely in the background
     html2canvas(elementToCapture, {
-        scale: 2,                     // Doubles the resolution for crisp text rendering
-        backgroundColor: "#ffffff",   // Ensures a clean white background
-        useCORS: false,               // Prevents asset cross-origin blocks
-        allowTaint: true,             // Allows capturing elements mixed with local/external assets
-        logging: false,               // Prevents console cluttering
+        scale: 2,                     
+        backgroundColor: "#ffffff",   
+        useCORS: false,               
+        allowTaint: true,             
+        logging: false,               
         ignoreElements: (element) => {
-            // CRITICAL FIX: Ignores the Tailwind v4 script block to stop the browser freezing
             return element.tagName === 'SCRIPT';
         }
     }).then(canvas => {
@@ -316,18 +318,17 @@ function shareToMessenger() {
             a.download = "electric-bill-breakdown.png";
             
             // 4. Trigger the download save prompt
-            document.body.appendChild(a); // Temporarily append to body to ensure compatibility
+            document.body.appendChild(a); 
             a.click(); 
-            document.body.removeChild(a); // Clean up immediately
-
-            // 5. Direct user to Messenger so they can paste/upload the saved image
-            window.open("https://www.messenger.com/", "_blank");
+            document.body.removeChild(a); 
         } catch (error) {
             console.error("Canvas export failed:", error);
-            alert("Could not generate image due to browser security restrictions. Try using the 'Copy Text Summary' instead!");
+            alert("Could not generate image due to browser security restrictions.");
         }
     }).catch(err => {
         console.error("html2canvas failed:", err);
+        // If the canvas engine crashed completely, let's at least keep Messenger open for them
+        if (messengerWindow) messengerWindow.focus();
     });
 }
         
