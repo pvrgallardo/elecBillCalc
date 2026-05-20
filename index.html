@@ -300,10 +300,14 @@ function shareToMessenger() {
     // 2. Convert the HTML elements into a canvas snapshot safely
     html2canvas(elementToCapture, {
         scale: 2,                     // Doubles the resolution for crisp text rendering
-        backgroundColor: "#ffffff",         // Ensures a clean white background
-        useCORS: false,                    // Turn this off to prevent GitHub permission freezes
-        allowTaint: true,                  // Allows capturing elements even if mixed with hosted CSS
-        logging: false                     // Disables heavy console spam
+        backgroundColor: "#ffffff",   // Ensures a clean white background
+        useCORS: false,               // Prevents asset cross-origin blocks
+        allowTaint: true,             // Allows capturing elements mixed with local/external assets
+        logging: false,               // Prevents console cluttering
+        ignoreElements: (element) => {
+            // CRITICAL FIX: Ignores the Tailwind v4 script block to stop the browser freezing
+            return element.tagName === 'SCRIPT';
+        }
     }).then(canvas => {
         try {
             // 3. Turn canvas into a downloadable PNG link
@@ -312,9 +316,9 @@ function shareToMessenger() {
             a.download = "electric-bill-breakdown.png";
             
             // 4. Trigger the download save prompt
-            document.body.appendChild(a); // Temporarily append to body to ensure click works in all browsers
+            document.body.appendChild(a); // Temporarily append to body to ensure compatibility
             a.click(); 
-            document.body.removeChild(a); // Clean it up
+            document.body.removeChild(a); // Clean up immediately
 
             // 5. Direct user to Messenger so they can paste/upload the saved image
             window.open("https://www.messenger.com/", "_blank");
