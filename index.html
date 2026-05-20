@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Electric Bill Calculator</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght=300;400;500;600;700&display=swap');
         body { font-family: 'Inter', sans-serif; }
@@ -243,183 +244,31 @@
             document.getElementById("subtotalPercent").textContent = `${(sumPercent * 100).toFixed(1)}%`;
         }
 
-        function saveInvoiceScreenshot() {
-            const invNo = document.getElementById("invoiceNo").value || "N/A";
-            const billingMonth = document.getElementById("billingMonth").value || "N/A";
-            const transDate = document.getElementById("transDate").value || "N/A";
-            const dueDate = document.getElementById("dueDate").value || "N/A";
-            const periodFrom = document.getElementById("periodFrom").value || "N/A";
-            const periodTo = document.getElementById("periodTo").value || "N/A";
-            const totalAmount = document.getElementById("totalAmount").value || "0.00";
-            const totalKw = document.getElementById("totalKw").value || "0.0";
-            const pricePerKw = document.getElementById("pricePerKw").innerText || "0.00";
-
-            const canvas = document.createElement("canvas");
-            const ctx = canvas.getContext("2d");
-
-            canvas.width = 1100;
-            canvas.height = 580;
-
-            ctx.fillStyle = "#f8fafc";
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-            const gradient = ctx.createLinearGradient(0, 0, canvas.width, 0);
-            gradient.addColorStop(0, "#2563eb");
-            gradient.addColorStop(1, "#4f46e5");
-            ctx.fillStyle = gradient;
-            ctx.fillRect(20, 20, 1060, 90);
-
-            ctx.fillStyle = "#ffffff";
-            ctx.font = "bold 24px Inter, system-ui, sans-serif";
-            ctx.fillText("⚡ Electric Bill Calculator", 45, 62);
-
-            ctx.font = "14px Inter, system-ui, sans-serif";
-            ctx.fillStyle = "#dbeafe";
-            ctx.fillText("Fully synchronized with your spreadsheet logic and formulas.", 45, 88);
-
-            ctx.fillStyle = "#ffffff";
-            ctx.fillRect(20, 130, 340, 430);
-            ctx.strokeStyle = "#e2e8f0";
-            ctx.lineWidth = 1;
-            ctx.strokeRect(20, 130, 340, 430);
-
-            ctx.fillStyle = "#0f172a";
-            ctx.font = "bold 16px Inter, system-ui, sans-serif";
-            ctx.fillText("Invoice Details", 40, 165);
-
-            ctx.beginPath();
-            ctx.moveTo(40, 178);
-            ctx.lineTo(340, 178);
-            ctx.stroke();
-
-            const drawField = (label, val, x, y) => {
-                ctx.fillStyle = "#64748b";
-                ctx.font = "950 10px Inter, system-ui, sans-serif";
-                ctx.fillText(label.toUpperCase(), x, y);
-                ctx.fillStyle = "#1e293b";
-                ctx.font = "500 14px Inter, system-ui, sans-serif";
-                ctx.fillText(val, x, y + 20);
-            };
-
-            drawField("Invoice No.", invNo, 40, 210);
-            drawField("Billing Month", billingMonth, 190, 210);
-            drawField("Transaction Date", transDate, 40, 265);
-            drawField("Bill Due Date", dueDate, 190, 265);
-            drawField("Period From", periodFrom, 40, 320);
-            drawField("Period To", periodTo, 190, 320);
-
-            drawField("Total Amount Due", `₱ ${totalAmount}`, 40, 385);
-            drawField("Total Energy Consumption (A)", `${totalKw} kW`, 40, 445);
-
-            ctx.fillStyle = "#eef2ff";
-            ctx.fillRect(40, 495, 300, 45);
-            ctx.fillStyle = "#4f46e5";
-            ctx.font = "bold 13px Inter, system-ui, sans-serif";
-            ctx.fillText(`Price per kW (G):   ₱ ${pricePerKw}`, 55, 522);
-
-            ctx.fillStyle = "#ffffff";
-            ctx.fillRect(380, 130, 700, 430);
-            ctx.strokeRect(380, 130, 700, 430);
-
-            ctx.fillStyle = "#0f172a";
-            ctx.font = "bold 16px Inter, system-ui, sans-serif";
-            ctx.fillText("Calculations Breakdown", 400, 165);
-
-            ctx.fillStyle = "#f1f5f9";
-            ctx.fillRect(400, 190, 660, 35);
-            ctx.fillStyle = "#475569";
-            ctx.font = "bold 11px Inter, system-ui, sans-serif";
-            ctx.fillText("TENANT", 410, 212);
-            ctx.fillText("CURRENT", 500, 212);
-            ctx.fillText("PREVIOUS", 580, 212);
-            ctx.fillText("TOTAL (C)", 665, 212);
-            ctx.fillText("PERCENT (D)", 745, 212);
-            ctx.fillText("DEDUCT (F)", 840, 212);
-            ctx.fillText("PAY kW (H)", 930, 212);
-            ctx.fillText("TOTAL DUE", 1010, 212);
-
-            initialTenants.forEach((tenant, idx) => {
-                const yPos = 260 + (idx * 42);
-                ctx.strokeStyle = "#f1f5f9";
-                ctx.beginPath();
-                ctx.moveTo(400, yPos - 18);
-                ctx.lineTo(1060, yPos - 18);
-                ctx.stroke();
-
-                ctx.fillStyle = "#0f172a";
-                ctx.font = "bold 13px Inter, system-ui, sans-serif";
-                ctx.fillText(tenant.name, 410, yPos);
-
-                const curr = document.getElementById(`curr-${idx}`).value || "0";
-                const prev = document.getElementById(`prev-${idx}`).value || "0";
-                const net = document.getElementById(`net-${idx}`).innerText;
-                const pct = document.getElementById(`pct-${idx}`).innerText;
-                const deduct = document.getElementById(`deduct-${idx}`).innerText;
-                const paykw = document.getElementById(`paykw-${idx}`).innerText;
-                const cost = document.getElementById(`cost-${idx}`).innerText;
-
-                ctx.font = "13px monospace";
-                ctx.fillStyle = "#334155";
-                ctx.fillText(curr, 500, yPos);
-                ctx.fillText(prev, 580, yPos);
-                ctx.fillText(net, 665, yPos);
-                ctx.fillText(pct, 745, yPos);
-                ctx.fillStyle = "#dc2626";
-                ctx.fillText(deduct, 840, yPos);
-                ctx.fillStyle = "#334155";
-                ctx.fillText(paykw, 930, yPos);
-                ctx.fillStyle = "#0f172a";
-                ctx.font = "bold 13px monospace";
-                ctx.fillText(cost, 1010, yPos);
-            });
-
-            const footerY = 435;
-            ctx.strokeStyle = "#cbd5e1";
-            ctx.lineWidth = 2;
-            ctx.beginPath();
-            ctx.moveTo(400, footerY);
-            ctx.lineTo(1060, footerY);
-            ctx.stroke();
-
-            ctx.fillStyle = "#f8fafc";
-            ctx.fillRect(400, footerY + 2, 660, 35);
-            ctx.fillStyle = "#0f172a";
-            ctx.font = "bold 12px Inter, system-ui, sans-serif";
-            ctx.fillText("subTotal (B)", 410, footerY + 24);
-
-            ctx.font = "bold 12px monospace";
-            ctx.fillText(document.getElementById("subtotalKw").innerText, 665, footerY + 24);
-            ctx.fillText(document.getElementById("subtotalPercent").innerText, 745, footerY + 24);
-            ctx.fillText(document.getElementById("subtotalDeduct").innerText, 840, footerY + 24);
-            ctx.fillText(document.getElementById("subtotalPaymentKw").innerText, 930, footerY + 24);
-            ctx.fillStyle = "#2563eb";
-            ctx.fillText(document.getElementById("subtotalCost").innerText, 1010, footerY + 24);
-
-            ctx.fillStyle = "#fef3c7";
-            ctx.fillRect(400, footerY + 45, 660, 45);
-            ctx.strokeStyle = "#fde68a";
-            ctx.lineWidth = 1;
-            ctx.strokeRect(400, footerY + 45, 660, 45);
-
-            ctx.fillStyle = "#78350f";
-            ctx.font = "bold 12px Inter, system-ui, sans-serif";
-            ctx.fillText("Total kW Excess (E) [B - A]:", 415, footerY + 72);
-            ctx.font = "bold 13px monospace";
-            ctx.fillText(document.getElementById("excessKw").innerText, 600, footerY + 72);
-            ctx.fillStyle = "#92400e";
-            ctx.font = "italic 11px Inter, system-ui, sans-serif";
-            ctx.fillText("Calculated as: subTotal (B) - Total Consumption (A)", 715, footerY + 72);
-
+        async function saveInvoiceScreenshot() {
             try {
-                const downloadLink = document.createElement('a');
-                downloadLink.download = `electric-bill-calculator-${invNo}.png`;
-                downloadLink.href = canvas.toDataURL("image/png");
-                document.body.appendChild(downloadLink);
-                downloadLink.click();
-                document.body.removeChild(downloadLink);
+                const invNo = document.getElementById("invoiceNo").value || "N/A";
+                const captureArea = document.getElementById("captureArea");
+                
+                const canvas = await html2canvas(captureArea, {
+                    backgroundColor: "#ffffff",
+                    scale: 2,
+                    useCORS: true,
+                    allowTaint: true
+                });
+                
+                canvas.toBlob(function(blob) {
+                    const url = URL.createObjectURL(blob);
+                    const downloadLink = document.createElement('a');
+                    downloadLink.download = `electric-bill-calculator-${invNo}.png`;
+                    downloadLink.href = url;
+                    document.body.appendChild(downloadLink);
+                    downloadLink.click();
+                    document.body.removeChild(downloadLink);
+                    URL.revokeObjectURL(url);
+                }, "image/png");
             } catch (error) {
-                console.error('Image capture failed:', error);
-                alert('Could not compile image asset stream natively.');
+                console.error('Screenshot failed:', error);
+                alert('Could not generate screenshot. Please try again.');
             }
         }
 
