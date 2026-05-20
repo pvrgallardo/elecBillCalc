@@ -296,38 +296,35 @@ function shareToMessenger() {
         return;
     }
 
-    // 1. Immediately open Messenger so the browser popup blocker doesn't stop it
-    const messengerWindow = window.open("https://www.messenger.com/", "_blank");
-
-    // 2. Generate the image snapshot in the background
+    // 1. Convert the area into a canvas object
     html2canvas(elementToCapture, {
         scale: 2,
         backgroundColor: "#ffffff",
-        useCORS: false,
-        allowTaint: true,
         logging: false,
         ignoreElements: (element) => element.tagName === 'SCRIPT'
     }).then(canvas => {
-        try {
-            // 3. Convert the canvas directly to a downloadable image URL
-            const imageDataUrl = canvas.toDataURL("image/png");
-            
-            // 4. Create a temporary download link
-            const downloadLink = document.createElement("a");
-            downloadLink.href = imageDataUrl;
-            downloadLink.download = "electric-bill-breakdown.png";
-            
-            // 5. Force the browser to download the file
-            document.body.appendChild(downloadLink);
-            downloadLink.click();
-            document.body.removeChild(downloadLink);
-
-        } catch (error) {
-            console.error("Image generation failed:", error);
-        }
+        // 2. Convert the canvas into a standard PNG image blob
+        canvas.toBlob(blob => {
+            try {
+                // 3. Force-write the image data directly onto the user's clipboard
+                const item = new ClipboardItem({ "image/png": blob });
+                navigator.clipboard.write([item]).then(() => {
+                    
+                    alert("📋 Image breakdown copied to clipboard!\n\nOpening Messenger now... Just press Ctrl+V (or Cmd+V) inside your chat thread to paste it!");
+                    
+                    // 4. Open Messenger seamlessly after they click OK
+                    window.open("https://www.messenger.com/", "_blank");
+                    
+                }).catch(err => {
+                    console.error("Clipboard blocked:", err);
+                    alert("Browser blocked clipboard access. Try using the 'Copy Text Summary' button instead!");
+                });
+            } catch (error) {
+                console.error("Blob structure error:", error);
+            }
+        }, "image/png");
     }).catch(err => {
-        console.error("html2canvas failed:", err);
-        if (messengerWindow) messengerWindow.focus();
+        console.error("html2canvas engine failed:", err);
     });
 }
         
