@@ -256,7 +256,9 @@
 
             let sumCost = 0;
             let sumPercent = 0;
-
+            let sumDeduct = 0;     
+            let sumPaymentKw = 0;
+            
             initialTenants.forEach((tenant, idx) => {
                 const netKw = tenantConsumptions[idx];
                 const pct = subtotalKw > 0 ? (netKw / subtotalKw) : 0;
@@ -266,12 +268,16 @@
 
                 sumCost += tenantCost;
                 sumPercent += pct;
+                sumDeduct += deduct;
+                sumPaymentKw += paymentKw;
 
                 document.getElementById(`net-${idx}`).textContent = netKw.toFixed(2);
                 document.getElementById(`pct-${idx}`).textContent = `${(pct * 100).toFixed(1)}%`;
                 document.getElementById(`deduct-${idx}`).textContent = deduct.toFixed(2);
                 document.getElementById(`paykw-${idx}`).textContent = paymentKw.toFixed(2);
                 document.getElementById(`cost-${idx}`).textContent = tenantCost.toFixed(2);
+                document.getElementById("subtotalDeduct").textContent = sumDeduct.toFixed(2);
+                document.getElementById("subtotalPaymentKw").textContent = sumPaymentKw.toFixed(2);
             });
 
             document.getElementById("subtotalCost").textContent = sumCost.toFixed(2);
