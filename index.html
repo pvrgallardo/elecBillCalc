@@ -425,8 +425,14 @@
         }
 
         function clearAllInputs() {
+            // 1. Clear all the input fields
             document.querySelectorAll("input").forEach(i => i.value = "");
+            
+            // 2. Clear the saved local storage data
             localStorage.removeItem("billCalcData");
+            
+            // 3. Recalculate to reset the visual breakdown columns to 0.00
+            calculateBill(); 
         }
 
         window.onload = initApp;
