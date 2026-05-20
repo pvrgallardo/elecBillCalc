@@ -92,7 +92,7 @@
                                     <th class="p-3 text-right">Payment kW (H)</th>
                                     <th class="p-3 text-right">Total Due</th>
                                 </tr>
-                            </table>
+                            </thead>
                             <tbody id="tenantRows" class="divide-y divide-slate-200 text-sm"></tbody>
                             <tfoot class="text-xs font-semibold text-slate-900 border-t-2 border-slate-300 divide-y divide-slate-200">
                                 <tr class="bg-slate-50">
@@ -141,22 +141,25 @@
             localStorage.setItem("billCalcData", JSON.stringify(data));
         }
 
-        if (saved) {
-            const data = JSON.parse(saved);
-            document.getElementById("invoiceNo").value = data.invoiceNo || "";
-            document.getElementById("billingMonth").value = data.billingMonth || "";
-            document.getElementById("transDate").value = data.transDate || "";
-            document.getElementById("dueDate").value = data.dueDate || "";
-            document.getElementById("periodFrom").value = data.periodFrom || "";
-            document.getElementById("periodTo").value = data.periodTo || "";
-            document.getElementById("totalAmount").value = data.totalAmount || "";
-            document.getElementById("totalKw").value = data.totalKw || "";
-            initialTenants.forEach((_, idx) => {
-                if (data.tenants[idx]) {
-                    document.getElementById(`curr-${idx}`).value = data.tenants[idx].current || "";
-                    document.getElementById(`prev-${idx}`).value = data.tenants[idx].previous || "";
-                }
-            });
+        function loadFromLocalStorage() {
+            const saved = localStorage.getItem("billCalcData");
+            if (saved) {
+                const data = JSON.parse(saved);
+                document.getElementById("invoiceNo").value = data.invoiceNo || "";
+                document.getElementById("billingMonth").value = data.billingMonth || "";
+                document.getElementById("transDate").value = data.transDate || "";
+                document.getElementById("dueDate").value = data.dueDate || "";
+                document.getElementById("periodFrom").value = data.periodFrom || "";
+                document.getElementById("periodTo").value = data.periodTo || "";
+                document.getElementById("totalAmount").value = data.totalAmount || "";
+                document.getElementById("totalKw").value = data.totalKw || "";
+                initialTenants.forEach((_, idx) => {
+                    if (data.tenants[idx]) {
+                        document.getElementById(`curr-${idx}`).value = data.tenants[idx].current || "";
+                        document.getElementById(`prev-${idx}`).value = data.tenants[idx].previous || "";
+                    }
+                });
+            }
         }
 
         function initApp() {
