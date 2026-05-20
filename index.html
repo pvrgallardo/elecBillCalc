@@ -21,7 +21,7 @@
 </head>
 <body class="bg-slate-50 text-slate-800 min-h-screen p-4 md:p-8">
 
-    <div class="max-w-6xl mx-auto bg-white rounded-2xl shadow-xl border border-slate-100 overflow-hidden">
+    <div id="calculatorContainer" class="max-w-6xl mx-auto bg-white rounded-2xl shadow-xl border border-slate-100 overflow-hidden">
         <div class="bg-gradient-to-r flow-root from-blue-600 to-indigo-700 p-6 md:p-8 text-white">
             <h1 class="text-2xl md:text-3xl font-bold tracking-tight">⚡ Electric Bill Calculator</h1>
             <p class="text-blue-100 mt-1 text-sm md:text-base">Fully synchronized with your spreadsheet logic and formulas.</p>
@@ -297,29 +297,25 @@ Due: ${dDate}`;
         }
 
 function saveInvoiceScreenshot() {
-    // CHANGE HERE: Target document.body instead of a specific ID to capture the whole page
-    const elementToCapture = document.body;
+    // Target the entire calculator block container
+    const elementToCapture = document.getElementById("calculatorContainer");
 
     if (!elementToCapture) {
-        alert("Error: Capture area not found.");
+        alert("Error: Calculator container not found.");
         return;
     }
 
-    // Capture the entire web page as a clean PNG image stream
+    // Capture the container cleanly as a PNG image snapshot
     htmlToImage.toPng(elementToCapture, { 
         quality: 0.95,
-        backgroundColor: '#f8fafc' // Matches your bg-slate-50 body background color
+        backgroundColor: '#ffffff' // Ensures the container has a clean white background fill
     })
     .then(function (dataUrl) {
-        // Create an automated download prompt
         const downloadLink = document.createElement('a');
-        
-        // Pull the custom invoice number if available to name the file dynamically
         const invNo = document.getElementById("invoiceNo").value || "summary";
-        downloadLink.download = `electric-bill-page-${invNo}.png`;
+        downloadLink.download = `electric-bill-calculator-${invNo}.png`;
         downloadLink.href = dataUrl;
         
-        // Trigger the image download to your computer
         document.body.appendChild(downloadLink);
         downloadLink.click();
         document.body.removeChild(downloadLink);
