@@ -79,12 +79,8 @@
                         <span id="pricePerKw" class="font-bold text-indigo-600 text-base">0.0000</span>
                     </div>
                     
-                    <button onclick="copyBillSummary()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium py-2 rounded-lg transition cursor-pointer flex items-center justify-center gap-2">
-                        📋 Copy Text Summary
-                    </button>
-                    
                     <button onclick="saveInvoiceScreenshot()" class="w-full bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium py-2 rounded-lg transition cursor-pointer flex items-center justify-center gap-2">
-                        📸 Save Breakdown Image
+                        📸 Take Screenshot
                     </button>
 
                     <button onclick="clearAllInputs()" class="w-full bg-slate-400 hover:bg-slate-500 text-white text-sm font-medium py-2 rounded-lg transition cursor-pointer flex items-center justify-center gap-2">
@@ -295,204 +291,199 @@ Billing Month: ${bMonth}
 Period: ${pFrom} to ${pTo}
 Due: ${dDate}`;
         }
-
-        function copyBillSummary() {
-            navigator.clipboard.writeText(summaryText);
-            alert("Text copied!");
+        
+        function saveInvoiceScreenshot() {
+            // 1. Gather live contextual values directly from your input elements
+            const invNo = document.getElementById("invoiceNo").value || "N/A";
+            const billingMonth = document.getElementById("billingMonth").value || "N/A";
+            const transDate = document.getElementById("transDate").value || "N/A";
+            const dueDate = document.getElementById("dueDate").value || "N/A";
+            const periodFrom = document.getElementById("periodFrom").value || "N/A";
+            const periodTo = document.getElementById("periodTo").value || "N/A";
+            const totalAmount = document.getElementById("totalAmount").value || "0.00";
+            const totalKw = document.getElementById("totalKw").value || "0.0";
+            const pricePerKw = document.getElementById("pricePerKw").innerText || "0.0000";
+        
+            // 2. Initialize a high-fidelity standalone snapshot canvas
+            const canvas = document.createElement("canvas");
+            const ctx = canvas.getContext("2d");
+            
+            // Fixed standard desktop layout grid canvas dimensions
+            canvas.width = 1100;
+            canvas.height = 580;
+        
+            // Background fill
+            ctx.fillStyle = "#f8fafc"; // Tailwind slate-50
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+        
+            // 3. Render Top Banner (Matches blue-600 to indigo-700 gradient)
+            const gradient = ctx.createLinearGradient(0, 0, canvas.width, 0);
+            gradient.addColorStop(0, "#2563eb");
+            gradient.addColorStop(1, "#4f46e5");
+            ctx.fillStyle = gradient;
+            ctx.fillRect(20, 20, 1060, 90);
+        
+            ctx.fillStyle = "#ffffff";
+            ctx.font = "bold 24px Inter, system-ui, sans-serif";
+            ctx.fillText("⚡ Electric Bill Calculator", 45, 62);
+            ctx.font = "14px Inter, system-ui, sans-serif";
+            ctx.fillStyle = "#dbeafe";
+            ctx.fillText("Fully synchronized with your spreadsheet logic and formulas.", 45, 88);
+        
+            // 4. COLUMN 1: Invoice details card container (Left Side)
+            ctx.fillStyle = "#ffffff";
+            ctx.fillRect(20, 130, 340, 430);
+            ctx.strokeStyle = "#e2e8f0";
+            ctx.lineWidth = 1;
+            ctx.strokeRect(20, 130, 340, 430);
+        
+            ctx.fillStyle = "#0f172a";
+            ctx.font = "bold 16px Inter, system-ui, sans-serif";
+            ctx.fillText("Invoice Details", 40, 165);
+            
+            // Draw horizontal separator rule line
+            ctx.beginPath(); ctx.moveTo(40, 178); ctx.lineTo(340, 178); ctx.stroke();
+        
+            // Utility text renderer macro for fields
+            const drawField = (label, val, x, y) => {
+                ctx.fillStyle = "#64748b";
+                ctx.font = "950 10px Inter, system-ui, sans-serif";
+                ctx.fillText(label.toUpperCase(), x, y);
+                ctx.fillStyle = "#1e293b";
+                ctx.font = "500 14px Inter, system-ui, sans-serif";
+                ctx.fillText(val, x, y + 20);
+            };
+        
+            drawField("Invoice No.", invNo, 40, 210);
+            drawField("Billing Month", billingMonth, 190, 210);
+            drawField("Transaction Date", transDate, 40, 265);
+            drawField("Bill Due Date", dueDate, 190, 265);
+            drawField("Period From", periodFrom, 40, 320);
+            drawField("Period To", periodTo, 190, 320);
+        
+            // Render Highlights For Total Metrics
+            drawField("Total Amount Due", `₱ ${totalAmount}`, 40, 385);
+            drawField("Total Energy Consumption (A)", `${totalKw} kW`, 40, 445);
+        
+            // Cost Per kW Block
+            ctx.fillStyle = "#eef2ff";
+            ctx.fillRect(40, 495, 300, 45);
+            ctx.fillStyle = "#4f46e5";
+            ctx.font = "bold 13px Inter, system-ui, sans-serif";
+            ctx.fillText(`Price per kW (G):   ₱ ${pricePerKw}`, 55, 522);
+        
+            // 5. COLUMN 2: Calculations Breakdown Grid (Right Side)
+            ctx.fillStyle = "#ffffff";
+            ctx.fillRect(380, 130, 700, 430);
+            ctx.strokeRect(380, 130, 700, 430);
+        
+            ctx.fillStyle = "#0f172a";
+            ctx.font = "bold 16px Inter, system-ui, sans-serif";
+            ctx.fillText("Calculations Breakdown", 400, 165);
+        
+            // Render Data Breakdown Table Headers
+            ctx.fillStyle = "#f1f5f9";
+            ctx.fillRect(400, 190, 660, 35);
+            
+            ctx.fillStyle = "#475569";
+            ctx.font = "bold 11px Inter, system-ui, sans-serif";
+            ctx.fillText("TENANT", 410, 212);
+            ctx.fillText("CURRENT", 500, 212);
+            ctx.fillText("PREVIOUS", 580, 212);
+            ctx.fillText("TOTAL (C)", 665, 212);
+            ctx.fillText("PERCENT (D)", 745, 212);
+            ctx.fillText("DEDUCT (F)", 840, 212);
+            ctx.fillText("PAY kW (H)", 930, 212);
+            ctx.fillText("TOTAL DUE", 1010, 212);
+        
+            // Loop through rows to extract real-time dynamic tenant table data values
+            initialTenants.forEach((tenant, idx) => {
+                const yPos = 260 + (idx * 42);
+                
+                // Add divider line between rows
+                ctx.strokeStyle = "#f1f5f9";
+                ctx.beginPath(); ctx.moveTo(400, yPos - 18); ctx.lineTo(1060, yPos - 18); ctx.stroke();
+        
+                ctx.fillStyle = "#0f172a";
+                ctx.font = "bold 13px Inter, system-ui, sans-serif";
+                ctx.fillText(tenant.name, 410, yPos);
+        
+                // Fetch inputs safely
+                const curr = document.getElementById(`curr-${idx}`).value || "0";
+                const prev = document.getElementById(`prev-${idx}`).value || "0";
+                const net = document.getElementById(`net-${idx}`).innerText;
+                const pct = document.getElementById(`pct-${idx}`).innerText;
+                const deduct = document.getElementById(`deduct-${idx}`).innerText;
+                const paykw = document.getElementById(`paykw-${idx}`).innerText;
+                const cost = document.getElementById(`cost-${idx}`).innerText;
+        
+                ctx.font = "13px monospace";
+                ctx.fillStyle = "#334155";
+                ctx.fillText(curr, 500, yPos);
+                ctx.fillText(prev, 580, yPos);
+                ctx.fillText(net, 665, yPos);
+                ctx.fillText(pct, 745, yPos);
+                ctx.fillStyle = "#dc2626"; // Red text for deductions
+                ctx.fillText(deduct, 840, yPos);
+                ctx.fillStyle = "#334155";
+                ctx.fillText(paykw, 930, yPos);
+                ctx.fillStyle = "#0f172a";
+                ctx.font = "bold 13px monospace";
+                ctx.fillText(cost, 1010, yPos);
+            });
+        
+            // 6. Draw Table Footer (Subtotals & Excess metrics)
+            const footerY = 435;
+            ctx.strokeStyle = "#cbd5e1";
+            ctx.lineWidth = 2;
+            ctx.beginPath(); ctx.moveTo(400, footerY); ctx.lineTo(1060, footerY); ctx.stroke();
+        
+            ctx.fillStyle = "#f8fafc";
+            ctx.fillRect(400, footerY + 2, 660, 35);
+            
+            ctx.fillStyle = "#0f172a";
+            ctx.font = "bold 12px Inter, system-ui, sans-serif";
+            ctx.fillText("subTotal (B)", 410, footerY + 24);
+        
+            ctx.font = "bold 12px monospace";
+            ctx.fillText(document.getElementById("subtotalKw").innerText, 665, footerY + 24);
+            ctx.fillText(document.getElementById("subtotalPercent").innerText, 745, footerY + 24);
+            ctx.fillText(document.getElementById("subtotalDeduct").innerText, 840, footerY + 24);
+            ctx.fillText(document.getElementById("subtotalPaymentKw").innerText, 930, footerY + 24);
+            ctx.fillStyle = "#2563eb";
+            ctx.fillText(document.getElementById("subtotalCost").innerText, 1010, footerY + 24);
+        
+            // Excess Metrics Banner Row
+            ctx.fillStyle = "#fef3c7"; // Tailwind amber-50
+            ctx.fillRect(400, footerY + 45, 660, 45);
+            ctx.strokeStyle = "#fde68a";
+            ctx.lineWidth = 1;
+            ctx.strokeRect(400, footerY + 45, 660, 45);
+        
+            ctx.fillStyle = "#78350f"; // Amber-900
+            ctx.font = "bold 12px Inter, system-ui, sans-serif";
+            ctx.fillText("Total kW Excess (E) [B - A]:", 415, footerY + 72);
+            ctx.font = "bold 13px monospace";
+            ctx.fillText(document.getElementById("excessKw").innerText, 600, footerY + 72);
+        
+            ctx.fillStyle = "#92400e";
+            ctx.font = "italic 11px Inter, system-ui, sans-serif";
+            ctx.fillText("Calculated as: subTotal (B) - Total Consumption (A)", 715, footerY + 72);
+        
+            // 7. Process compilation to image download link stream natively
+            try {
+                const downloadLink = document.createElement('a');
+                downloadLink.download = `electric-bill-calculator-${invNo}.png`;
+                downloadLink.href = canvas.toDataURL("image/png");
+                
+                document.body.appendChild(downloadLink);
+                downloadLink.click();
+                document.body.removeChild(downloadLink);
+            } catch (error) {
+                console.error('Image capture failed:', error);
+                alert('Could not compile image asset stream natively.');
+            }
         }
-
-function saveInvoiceScreenshot() {
-    // 1. Gather live contextual values directly from your input elements
-    const invNo = document.getElementById("invoiceNo").value || "N/A";
-    const billingMonth = document.getElementById("billingMonth").value || "N/A";
-    const transDate = document.getElementById("transDate").value || "N/A";
-    const dueDate = document.getElementById("dueDate").value || "N/A";
-    const periodFrom = document.getElementById("periodFrom").value || "N/A";
-    const periodTo = document.getElementById("periodTo").value || "N/A";
-    const totalAmount = document.getElementById("totalAmount").value || "0.00";
-    const totalKw = document.getElementById("totalKw").value || "0.0";
-    const pricePerKw = document.getElementById("pricePerKw").innerText || "0.0000";
-
-    // 2. Initialize a high-fidelity standalone snapshot canvas
-    const canvas = document.createElement("canvas");
-    const ctx = canvas.getContext("2d");
-    
-    // Fixed standard desktop layout grid canvas dimensions
-    canvas.width = 1100;
-    canvas.height = 580;
-
-    // Background fill
-    ctx.fillStyle = "#f8fafc"; // Tailwind slate-50
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-    // 3. Render Top Banner (Matches blue-600 to indigo-700 gradient)
-    const gradient = ctx.createLinearGradient(0, 0, canvas.width, 0);
-    gradient.addColorStop(0, "#2563eb");
-    gradient.addColorStop(1, "#4f46e5");
-    ctx.fillStyle = gradient;
-    ctx.fillRect(20, 20, 1060, 90);
-
-    ctx.fillStyle = "#ffffff";
-    ctx.font = "bold 24px Inter, system-ui, sans-serif";
-    ctx.fillText("⚡ Electric Bill Calculator", 45, 62);
-    ctx.font = "14px Inter, system-ui, sans-serif";
-    ctx.fillStyle = "#dbeafe";
-    ctx.fillText("Fully synchronized with your spreadsheet logic and formulas.", 45, 88);
-
-    // 4. COLUMN 1: Invoice details card container (Left Side)
-    ctx.fillStyle = "#ffffff";
-    ctx.fillRect(20, 130, 340, 430);
-    ctx.strokeStyle = "#e2e8f0";
-    ctx.lineWidth = 1;
-    ctx.strokeRect(20, 130, 340, 430);
-
-    ctx.fillStyle = "#0f172a";
-    ctx.font = "bold 16px Inter, system-ui, sans-serif";
-    ctx.fillText("Invoice Details", 40, 165);
-    
-    // Draw horizontal separator rule line
-    ctx.beginPath(); ctx.moveTo(40, 178); ctx.lineTo(340, 178); ctx.stroke();
-
-    // Utility text renderer macro for fields
-    const drawField = (label, val, x, y) => {
-        ctx.fillStyle = "#64748b";
-        ctx.font = "950 10px Inter, system-ui, sans-serif";
-        ctx.fillText(label.toUpperCase(), x, y);
-        ctx.fillStyle = "#1e293b";
-        ctx.font = "500 14px Inter, system-ui, sans-serif";
-        ctx.fillText(val, x, y + 20);
-    };
-
-    drawField("Invoice No.", invNo, 40, 210);
-    drawField("Billing Month", billingMonth, 190, 210);
-    drawField("Transaction Date", transDate, 40, 265);
-    drawField("Bill Due Date", dueDate, 190, 265);
-    drawField("Period From", periodFrom, 40, 320);
-    drawField("Period To", periodTo, 190, 320);
-
-    // Render Highlights For Total Metrics
-    drawField("Total Amount Due", `₱ ${totalAmount}`, 40, 385);
-    drawField("Total Energy Consumption (A)", `${totalKw} kW`, 40, 445);
-
-    // Cost Per kW Block
-    ctx.fillStyle = "#eef2ff";
-    ctx.fillRect(40, 495, 300, 45);
-    ctx.fillStyle = "#4f46e5";
-    ctx.font = "bold 13px Inter, system-ui, sans-serif";
-    ctx.fillText(`Price per kW (G):   ₱ ${pricePerKw}`, 55, 522);
-
-    // 5. COLUMN 2: Calculations Breakdown Grid (Right Side)
-    ctx.fillStyle = "#ffffff";
-    ctx.fillRect(380, 130, 700, 430);
-    ctx.strokeRect(380, 130, 700, 430);
-
-    ctx.fillStyle = "#0f172a";
-    ctx.font = "bold 16px Inter, system-ui, sans-serif";
-    ctx.fillText("Calculations Breakdown", 400, 165);
-
-    // Render Data Breakdown Table Headers
-    ctx.fillStyle = "#f1f5f9";
-    ctx.fillRect(400, 190, 660, 35);
-    
-    ctx.fillStyle = "#475569";
-    ctx.font = "bold 11px Inter, system-ui, sans-serif";
-    ctx.fillText("TENANT", 410, 212);
-    ctx.fillText("CURRENT", 500, 212);
-    ctx.fillText("PREVIOUS", 580, 212);
-    ctx.fillText("TOTAL (C)", 665, 212);
-    ctx.fillText("PERCENT (D)", 745, 212);
-    ctx.fillText("DEDUCT (F)", 840, 212);
-    ctx.fillText("PAY kW (H)", 930, 212);
-    ctx.fillText("TOTAL DUE", 1010, 212);
-
-    // Loop through rows to extract real-time dynamic tenant table data values
-    initialTenants.forEach((tenant, idx) => {
-        const yPos = 260 + (idx * 42);
-        
-        // Add divider line between rows
-        ctx.strokeStyle = "#f1f5f9";
-        ctx.beginPath(); ctx.moveTo(400, yPos - 18); ctx.lineTo(1060, yPos - 18); ctx.stroke();
-
-        ctx.fillStyle = "#0f172a";
-        ctx.font = "bold 13px Inter, system-ui, sans-serif";
-        ctx.fillText(tenant.name, 410, yPos);
-
-        // Fetch inputs safely
-        const curr = document.getElementById(`curr-${idx}`).value || "0";
-        const prev = document.getElementById(`prev-${idx}`).value || "0";
-        const net = document.getElementById(`net-${idx}`).innerText;
-        const pct = document.getElementById(`pct-${idx}`).innerText;
-        const deduct = document.getElementById(`deduct-${idx}`).innerText;
-        const paykw = document.getElementById(`paykw-${idx}`).innerText;
-        const cost = document.getElementById(`cost-${idx}`).innerText;
-
-        ctx.font = "13px monospace";
-        ctx.fillStyle = "#334155";
-        ctx.fillText(curr, 500, yPos);
-        ctx.fillText(prev, 580, yPos);
-        ctx.fillText(net, 665, yPos);
-        ctx.fillText(pct, 745, yPos);
-        ctx.fillStyle = "#dc2626"; // Red text for deductions
-        ctx.fillText(deduct, 840, yPos);
-        ctx.fillStyle = "#334155";
-        ctx.fillText(paykw, 930, yPos);
-        ctx.fillStyle = "#0f172a";
-        ctx.font = "bold 13px monospace";
-        ctx.fillText(cost, 1010, yPos);
-    });
-
-    // 6. Draw Table Footer (Subtotals & Excess metrics)
-    const footerY = 435;
-    ctx.strokeStyle = "#cbd5e1";
-    ctx.lineWidth = 2;
-    ctx.beginPath(); ctx.moveTo(400, footerY); ctx.lineTo(1060, footerY); ctx.stroke();
-
-    ctx.fillStyle = "#f8fafc";
-    ctx.fillRect(400, footerY + 2, 660, 35);
-    
-    ctx.fillStyle = "#0f172a";
-    ctx.font = "bold 12px Inter, system-ui, sans-serif";
-    ctx.fillText("subTotal (B)", 410, footerY + 24);
-
-    ctx.font = "bold 12px monospace";
-    ctx.fillText(document.getElementById("subtotalKw").innerText, 665, footerY + 24);
-    ctx.fillText(document.getElementById("subtotalPercent").innerText, 745, footerY + 24);
-    ctx.fillText(document.getElementById("subtotalDeduct").innerText, 840, footerY + 24);
-    ctx.fillText(document.getElementById("subtotalPaymentKw").innerText, 930, footerY + 24);
-    ctx.fillStyle = "#2563eb";
-    ctx.fillText(document.getElementById("subtotalCost").innerText, 1010, footerY + 24);
-
-    // Excess Metrics Banner Row
-    ctx.fillStyle = "#fef3c7"; // Tailwind amber-50
-    ctx.fillRect(400, footerY + 45, 660, 45);
-    ctx.strokeStyle = "#fde68a";
-    ctx.lineWidth = 1;
-    ctx.strokeRect(400, footerY + 45, 660, 45);
-
-    ctx.fillStyle = "#78350f"; // Amber-900
-    ctx.font = "bold 12px Inter, system-ui, sans-serif";
-    ctx.fillText("Total kW Excess (E) [B - A]:", 415, footerY + 72);
-    ctx.font = "bold 13px monospace";
-    ctx.fillText(document.getElementById("excessKw").innerText, 600, footerY + 72);
-
-    ctx.fillStyle = "#92400e";
-    ctx.font = "italic 11px Inter, system-ui, sans-serif";
-    ctx.fillText("Calculated as: subTotal (B) - Total Consumption (A)", 715, footerY + 72);
-
-    // 7. Process compilation to image download link stream natively
-    try {
-        const downloadLink = document.createElement('a');
-        downloadLink.download = `electric-bill-calculator-${invNo}.png`;
-        downloadLink.href = canvas.toDataURL("image/png");
-        
-        document.body.appendChild(downloadLink);
-        downloadLink.click();
-        document.body.removeChild(downloadLink);
-    } catch (error) {
-        console.error('Image capture failed:', error);
-        alert('Could not compile image asset stream natively.');
-    }
-}
         
         function clearAllInputs() {
             document.querySelectorAll("input").forEach(i => i.value = "");
