@@ -304,47 +304,40 @@ function saveInvoiceScreenshot() {
         return;
     }
 
-    // 1. Save the original styling so we can restore it afterward
-    const originalWidth = elementToCapture.style.width;
-    const originalMaxWidth = elementToCapture.style.maxWidth;
-    const originalMinWidth = elementToCapture.style.minWidth;
+    // Set standard desktop capture dimensions
+    const captureWidth = 1152; 
+    const captureHeight = elementToCapture.scrollHeight;
 
-    // 2. FORCE desktop dimensions on the live element so Tailwind v4 renders the full grid
-    // regardless of how small or dynamically sized the browser window currently is
-    elementToCapture.style.width = "1152px";
-    elementToCapture.style.maxWidth = "1152px";
-    elementToCapture.style.minWidth = "1152px";
-
-    // 3. Wait a split-second for the browser to recalculate the layout, then take the snapshot
-    setTimeout(() => {
-        htmlToImage.toPng(elementToCapture, { 
-            quality: 1,
-            backgroundColor: '#ffffff'
-        })
-        .then(function (dataUrl) {
-            // 4. Create an automated download prompt
-            const downloadLink = document.createElement('a');
-            const invNo = document.getElementById("invoiceNo").value || "summary";
-            downloadLink.download = `electric-bill-calculator-${invNo}.png`;
-            downloadLink.href = dataUrl;
-            
-            document.body.appendChild(downloadLink);
-            downloadLink.click();
-            document.body.removeChild(downloadLink);
-        })
-        .catch(function (error) {
-            console.error('Screenshot generation crashed:', error);
-            alert('Could not capture screenshot. Try using the "Copy Text Summary" instead!');
-        })
-        .finally(function () {
-            // 5. RESTORE the original responsive styles immediately
-            elementToCapture.style.width = originalWidth;
-            elementToCapture.style.maxWidth = originalMaxWidth;
-            elementToCapture.style.minWidth = originalMinWidth;
-        });
-    }, 100); // 100ms delay gives the engine time to paint the full-width desktop view safely
+    // Use htmlToImage with exact pixel dimensions to force a complete desktop render pass
+    htmlToImage.toPng(elementToCapture, { 
+        width: captureWidth,
+        height: captureHeight,
+        style: {
+            width: captureWidth + 'px',
+            height: captureHeight + 'px',
+            maxWidth: 'none',
+            transform: 'scale(1)',
+            transformOrigin: 'top left'
+        },
+        quality: 1,
+        backgroundColor: '#ffffff'
+    })
+    .then(function (dataUrl) {
+        const downloadLink = document.createElement('a');
+        const invNo = document.getElementById("invoiceNo").value || "summary";
+        downloadLink.download = `electric-bill-calculator-${invNo}.png`;
+        downloadLink.href = dataUrl;
+        
+        document.body.appendChild(downloadLink);
+        downloadLink.click();
+        document.body.removeChild(downloadLink);
+    })
+    .catch(function (error) {
+        console.error('Screenshot generation crashed:', error);
+        alert('Could not capture screenshot. Try using the "Copy Text Summary" instead!');
+    });
 }
- 
+        
         function clearAllInputs() {
             document.querySelectorAll("input").forEach(i => i.value = "");
             localStorage.removeItem("billCalcData");
