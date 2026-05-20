@@ -10,6 +10,7 @@
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
         body { font-family: 'Inter', sans-serif; }
     </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 </head>
 <body class="bg-slate-50 text-slate-800 min-h-screen p-4 md:p-8">
 
@@ -289,15 +290,28 @@ Due: ${dDate}`;
         }
 
         function shareToMessenger() {
-            html2canvas(document.getElementById("captureArea")).then(canvas => {
-                const a = document.createElement("a");
-                a.href = canvas.toDataURL("image/png");
-                a.download = "electric-bill.png";
-                a.click();
-                window.open("https://www.messenger.com/", "_blank");
+            // 1. Target the calculations breakdown wrapper
+            const elementToCapture = document.getElementById("captureArea");
+
+            // 2. Convert the HTML elements into a high-quality canvas snapshot
+            html2canvas(elementToCapture, {
+                scale: 2,             // Doubles the resolution for crisp text rendering
+                backgroundColor: "#ffffff", // Ensures the image has a clean white background
+                useCORS: true         // Prevents external image or font components from breaking
+            }).then(canvas => {
+        
+                // 3. Turn canvas into a downloadable PNG link
+                    const a = document.createElement("a");
+                    a.href = canvas.toDataURL("image/png");
+                    a.download = "electric-bill-breakdown.png";
+        
+                // 4. Trigger the download save prompt
+                    a.click(); 
+
+                // 5. Direct user to Messenger so they can paste/upload the saved image
+                    window.open("https://www.messenger.com/", "_blank");
             });
         }
-
         function clearAllInputs() {
             document.querySelectorAll("input").forEach(i => i.value = "");
             localStorage.removeItem("billCalcData");
