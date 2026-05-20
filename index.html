@@ -297,7 +297,6 @@ Due: ${dDate}`;
         }
 
 function saveInvoiceScreenshot() {
-    // 1. Target the full white calculator box container
     const elementToCapture = document.getElementById("calculatorContainer");
 
     if (!elementToCapture) {
@@ -305,54 +304,45 @@ function saveInvoiceScreenshot() {
         return;
     }
 
-    // 2. Clone the element to isolate it from the active resizing browser window
-    const clone = elementToCapture.cloneNode(true);
-    
-    // 3. Place the clone into an off-screen desktop sandbox container
-    const sandbox = document.createElement("div");
-    sandbox.style.position = "absolute";
-    sandbox.style.top = "-9999px";
-    sandbox.style.left = "-9999px";
-    sandbox.style.width = "1152px"; // Max-w-6xl standard desktop width
-    sandbox.style.backgroundColor = "#ffffff";
-    
-    sandbox.appendChild(clone);
-    document.body.appendChild(sandbox);
+    // 1. Save the original styling so we can restore it afterward
+    const originalWidth = elementToCapture.style.width;
+    const originalMaxWidth = elementToCapture.style.maxWidth;
+    const originalMinWidth = elementToCapture.style.minWidth;
 
-    // 4. Force all inputs in the clone to display their current values
-    // (Cloned inputs default to empty if we don't manually map them)
-    const originalInputs = elementToCapture.querySelectorAll("input");
-    const clonedInputs = clone.querySelectorAll("input");
-    originalInputs.forEach((input, index) => {
-        if (clonedInputs[index]) {
-            clonedInputs[index].value = input.value;
-        }
-    });
+    // 2. FORCE desktop dimensions on the live element so Tailwind v4 renders the full grid
+    // regardless of how small or dynamically sized the browser window currently is
+    elementToCapture.style.width = "1152px";
+    elementToCapture.style.maxWidth = "1152px";
+    elementToCapture.style.minWidth = "1152px";
 
-    // 5. Snapshot the stable, unclipped sandbox container
-    htmlToImage.toPng(sandbox, { 
-        quality: 1,
-        backgroundColor: '#ffffff'
-    })
-    .then(function (dataUrl) {
-        // 6. Setup and prompt the automatic download
-        const downloadLink = document.createElement('a');
-        const invNo = document.getElementById("invoiceNo").value || "summary";
-        downloadLink.download = `electric-bill-calculator-${invNo}.png`;
-        downloadLink.href = dataUrl;
-        
-        document.body.appendChild(downloadLink);
-        downloadLink.click();
-        document.body.removeChild(downloadLink);
-    })
-    .catch(function (error) {
-        console.error('Screenshot generation crashed:', error);
-        alert('Could not capture screenshot. Try using the "Copy Text Summary" instead!');
-    })
-    .finally(function () {
-        // 7. Always clean up and delete the temporary sandbox element
-        document.body.removeChild(sandbox);
-    });
+    // 3. Wait a split-second for the browser to recalculate the layout, then take the snapshot
+    setTimeout(() => {
+        htmlToImage.toPng(elementToCapture, { 
+            quality: 1,
+            backgroundColor: '#ffffff'
+        })
+        .then(function (dataUrl) {
+            // 4. Create an automated download prompt
+            const downloadLink = document.createElement('a');
+            const invNo = document.getElementById("invoiceNo").value || "summary";
+            downloadLink.download = `electric-bill-calculator-${invNo}.png`;
+            downloadLink.href = dataUrl;
+            
+            document.body.appendChild(downloadLink);
+            downloadLink.click();
+            document.body.removeChild(downloadLink);
+        })
+        .catch(function (error) {
+            console.error('Screenshot generation crashed:', error);
+            alert('Could not capture screenshot. Try using the "Copy Text Summary" instead!');
+        })
+        .finally(function () {
+            // 5. RESTORE the original responsive styles immediately
+            elementToCapture.style.width = originalWidth;
+            elementToCapture.style.maxWidth = originalMaxWidth;
+            elementToCapture.style.minWidth = originalMinWidth;
+        });
+    }, 100); // 100ms delay gives the engine time to paint the full-width desktop view safely
 }
  
         function clearAllInputs() {
