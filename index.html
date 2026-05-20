@@ -297,17 +297,18 @@ Due: ${dDate}`;
         }
 
 function saveInvoiceScreenshot() {
-    const elementToCapture = document.getElementById("captureArea");
+    // CHANGE HERE: Target document.body instead of a specific ID to capture the whole page
+    const elementToCapture = document.body;
 
     if (!elementToCapture) {
         alert("Error: Capture area not found.");
         return;
     }
 
-    // Capture the element directly as a clean PNG image stream
+    // Capture the entire web page as a clean PNG image stream
     htmlToImage.toPng(elementToCapture, { 
         quality: 0.95,
-        backgroundColor: '#ffffff' 
+        backgroundColor: '#f8fafc' // Matches your bg-slate-50 body background color
     })
     .then(function (dataUrl) {
         // Create an automated download prompt
@@ -315,7 +316,7 @@ function saveInvoiceScreenshot() {
         
         // Pull the custom invoice number if available to name the file dynamically
         const invNo = document.getElementById("invoiceNo").value || "summary";
-        downloadLink.download = `electric-bill-invoice-${invNo}.png`;
+        downloadLink.download = `electric-bill-page-${invNo}.png`;
         downloadLink.href = dataUrl;
         
         // Trigger the image download to your computer
