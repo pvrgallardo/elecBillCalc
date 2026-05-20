@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Electric Bill Calculator</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html-to-image/1.11.11/html-to-image.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
             @import url('https://fonts.googleapis.com/css2?family=Inter:wght=300;400;500;600;700&display=swap');
             body { font-family: 'Inter', sans-serif; }
@@ -304,38 +304,54 @@ function saveInvoiceScreenshot() {
         return;
     }
 
-    // Set standard desktop capture dimensions
-    const captureWidth = 1152; 
-    const captureHeight = elementToCapture.scrollHeight;
+    // 1. Inject a temporary CSS block to force desktop-rendering rules, 
+    // ensuring the grid doesn't compress or cut off if the browser window is currently small/resized.
+    const styleOverride = document.createElement("style");
+    styleOverride.innerHTML = `
+        #calculatorContainer {
+            width: 1152px !important;
+            max-width: 1152px !important;
+            min-width: 1152px !important;
+            transform: none !important;
+        }
+        .grid {
+            grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+        }
+        .lg\\:col-span-1 {
+            grid-column: span 1 / span 1 !important;
+        }
+        .lg\\:col-span-2 {
+            grid-column: span 2 / span 2 !important;
+        }
+    `;
+    document.head.appendChild(styleOverride);
 
-    // Use htmlToImage with exact pixel dimensions to force a complete desktop render pass
-    htmlToImage.toPng(elementToCapture, { 
-        width: captureWidth,
-        height: captureHeight,
-        style: {
-            width: captureWidth + 'px',
-            height: captureHeight + 'px',
-            maxWidth: 'none',
-            transform: 'scale(1)',
-            transformOrigin: 'top left'
-        },
-        quality: 1,
-        backgroundColor: '#ffffff'
-    })
-    .then(function (dataUrl) {
-        const downloadLink = document.createElement('a');
-        const invNo = document.getElementById("invoiceNo").value || "summary";
-        downloadLink.download = `electric-bill-calculator-${invNo}.png`;
-        downloadLink.href = dataUrl;
-        
-        document.body.appendChild(downloadLink);
-        downloadLink.click();
-        document.body.removeChild(downloadLink);
-    })
-    .catch(function (error) {
-        console.error('Screenshot generation crashed:', error);
-        alert('Could not capture screenshot. Try using the "Copy Text Summary" instead!');
-    });
+    // 2. Give the browser an instant frame to calculate styles, then capture via html2canvas
+    setTimeout(() => {
+        html2canvas(elementToCapture, {
+            scale: 2, // Keeps text ultra-sharp
+            backgroundColor: "#ffffff",
+            logging: false,
+            useCORS: true,
+            allowTaint: true
+        }).then(canvas => {
+            // 3. Trigger the standard file download flow
+            const downloadLink = document.createElement('a');
+            const invNo = document.getElementById("invoiceNo").value || "summary";
+            downloadLink.download = `electric-bill-calculator-${invNo}.png`;
+            downloadLink.href = canvas.toDataURL("image/png");
+            
+            document.body.appendChild(downloadLink);
+            downloadLink.click();
+            document.body.removeChild(downloadLink);
+        }).catch(error => {
+            console.error('Screenshot generation crashed:', error);
+            alert('Could not capture screenshot.');
+        }).finally(() => {
+            // 4. Clean up the style override instantly so your live page goes right back to matching your screen size
+            document.head.removeChild(styleOverride);
+        });
+    }, 50);
 }
         
         function clearAllInputs() {
