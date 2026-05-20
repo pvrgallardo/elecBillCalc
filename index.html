@@ -305,27 +305,34 @@ function saveInvoiceScreenshot() {
         return;
     }
 
-    // CRITICAL FIX: Force the snapshot generator to capture at standard desktop layout size
-    // This stops Tailwind v4 grid structures from collapsing or clipping in half lengthwise.
+    // 2. Read the full internal scroll sizes so it captures the layout 
+    // even if the screen is currently small, resized, or mobile view.
+    const fullWidth = elementToCapture.scrollWidth;
+    const fullHeight = elementToCapture.scrollHeight;
+
+    // 3. Capture the container using its absolute unclipped dimensions
     htmlToImage.toPng(elementToCapture, { 
         quality: 1,
         backgroundColor: '#ffffff',
-        width: 1200,                // Explicit desktop rendering width
+        width: fullWidth,
+        height: fullHeight,
         style: {
             transform: 'scale(1)',
             transformOrigin: 'top left',
-            width: '1200px',        // Prevents responsive grid scaling breaks
-            maxWidth: '1200px'
+            width: fullWidth + 'px',
+            height: fullHeight + 'px',
+            maxWidth: 'none',
+            maxHeight: 'none'
         }
     })
     .then(function (dataUrl) {
-        // 2. Setup the automatic file saving link
+        // 4. Setup the automatic file saving link
         const downloadLink = document.createElement('a');
         const invNo = document.getElementById("invoiceNo").value || "summary";
         downloadLink.download = `electric-bill-calculator-${invNo}.png`;
         downloadLink.href = dataUrl;
         
-        // 3. Prompt the file save download
+        // 5. Prompt the file save download
         document.body.appendChild(downloadLink);
         downloadLink.click();
         document.body.removeChild(downloadLink);
