@@ -10,7 +10,6 @@
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
         body { font-family: 'Inter', sans-serif; }
     </style>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 </head>
 <body class="bg-slate-50 text-slate-800 min-h-screen p-4 md:p-8">
 
@@ -289,28 +288,44 @@ Due: ${dDate}`;
             alert("Text copied!");
         }
 
-        function shareToMessenger() {
-            // 1. Target the calculations breakdown wrapper
-            const elementToCapture = document.getElementById("captureArea");
+function shareToMessenger() {
+    // 1. Target the calculations breakdown wrapper
+    const elementToCapture = document.getElementById("captureArea");
 
-            // 2. Convert the HTML elements into a high-quality canvas snapshot
-            html2canvas(elementToCapture, {
-                scale: 2,
-                backgroundColor: "#ffffff",
-                useCORS: true
-            }).then(canvas => {
-                // 3. Turn canvas into a downloadable PNG link
-                const a = document.createElement("a");
-                a.href = canvas.toDataURL("image/png");
-                a.download = "electric-bill-breakdown.png";
-        
-                // 4. Trigger the download save prompt
-                a.click(); 
+    if (!elementToCapture) {
+        alert("Error: Capture area not found.");
+        return;
+    }
 
-                // 5. Direct user to Messenger so they can paste/upload the saved image
-                window.open("https://www.messenger.com/", "_blank");
-            });
+    // 2. Convert the HTML elements into a canvas snapshot safely
+    html2canvas(elementToCapture, {
+        scale: 2,                     // Doubles the resolution for crisp text rendering
+        backgroundColor: "#ffffff",         // Ensures a clean white background
+        useCORS: false,                    // Turn this off to prevent GitHub permission freezes
+        allowTaint: true,                  // Allows capturing elements even if mixed with hosted CSS
+        logging: false                     // Disables heavy console spam
+    }).then(canvas => {
+        try {
+            // 3. Turn canvas into a downloadable PNG link
+            const a = document.createElement("a");
+            a.href = canvas.toDataURL("image/png");
+            a.download = "electric-bill-breakdown.png";
+            
+            // 4. Trigger the download save prompt
+            document.body.appendChild(a); // Temporarily append to body to ensure click works in all browsers
+            a.click(); 
+            document.body.removeChild(a); // Clean it up
+
+            // 5. Direct user to Messenger so they can paste/upload the saved image
+            window.open("https://www.messenger.com/", "_blank");
+        } catch (error) {
+            console.error("Canvas export failed:", error);
+            alert("Could not generate image due to browser security restrictions. Try using the 'Copy Text Summary' instead!");
         }
+    }).catch(err => {
+        console.error("html2canvas failed:", err);
+    });
+}
         
         function clearAllInputs() {
             document.querySelectorAll("input").forEach(i => i.value = "");
