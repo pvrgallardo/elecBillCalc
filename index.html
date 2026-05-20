@@ -7,15 +7,15 @@
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
     <style>
-            @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+            @import url('https://fonts.googleapis.com/css2?family=Inter:wght=300;400;500;600;700&display=swap');
             body { font-family: 'Inter', sans-serif; }
 
-            /* Hides everything except the invoice summary card when saving */
+            /* Hides everything except your calculations card during the snapshot capture */
             @media print {
-                body { background: white !important; p: 0 !important; }
+                body { background: #ffffff !important; padding: 0 !important; }
                 .lg\:col-span-1, h1, p.text-blue-100 { display: none !important; }
-                .max-w-6xl { shadow: none !important; border: none !important; }
-                #captureArea { width: 100% !important; p: 0 !important; }
+                .max-w-6xl { shadow: none !important; border: none !important; margin: 0 !important; width: 100% !important; }
+                #captureArea { width: 100% !important; padding: 0 !important; }
             }
     </style>
 </head>
@@ -84,8 +84,8 @@
                         📋 Copy Text Summary
                     </button>
                     
-                    <button onclick="shareToMessenger()" class="w-full bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium py-2 rounded-lg transition cursor-pointer flex items-center justify-center gap-2">
-                        📸 Save Image & Open Messenger
+                    <button onclick="saveInvoiceScreenshot()" class="w-full bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium py-2 rounded-lg transition cursor-pointer flex items-center justify-center gap-2">
+                        📸 Save Breakdown Image
                     </button>
 
                     <button onclick="clearAllInputs()" class="w-full bg-slate-400 hover:bg-slate-500 text-white text-sm font-medium py-2 rounded-lg transition cursor-pointer flex items-center justify-center gap-2">
@@ -296,14 +296,10 @@ Due: ${dDate}`;
             alert("Text copied!");
         }
 
-function shareToMessenger() {
-    // 1. Open Messenger immediately so the browser's popup blocker doesn't interfere
-    window.open("https://www.messenger.com/", "_blank");
-
-    // 2. Trigger the browser's built-in print utility
-    // This allows the user to cleanly "Save as PDF" or "Save as Image" with perfect styling
-    window.print();
-}
+        function saveInvoiceScreenshot() {
+            // Triggers the browser's native print layout to let you save it perfectly
+            window.print();
+        }
  
         function clearAllInputs() {
             document.querySelectorAll("input").forEach(i => i.value = "");
