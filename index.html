@@ -6,30 +6,25 @@
     <title>Electric Bill Calculator</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <style>
-            @import url('https://fonts.googleapis.com/css2?family=Inter:wght=300;400;500;600;700&display=swap');
-            body { font-family: 'Inter', sans-serif; }
-
-            /* Hides everything except your calculations card during the snapshot capture */
-            @media print {
-                body { background: #ffffff !important; padding: 0 !important; }
-                .lg\:col-span-1, h1, p.text-blue-100 { display: none !important; }
-                .max-w-6xl { shadow: none !important; border: none !important; margin: 0 !important; width: 100% !important; }
-                #captureArea { width: 100% !important; padding: 0 !important; }
-            }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght=300;400;500;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        @media print {
+            body { background: #ffffff !important; padding: 0 !important; }
+            .lg\:col-span-1, h1, p.text-blue-100 { display: none !important; }
+            .max-w-6xl { shadow: none !important; border: none !important; margin: 0 !important; width: 100% !important; }
+            #captureArea { width: 100% !important; padding: 0 !important; }
+        }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-800 min-h-screen p-4 md:p-8">
-
     <div id="calculatorContainer" class="max-w-6xl mx-auto bg-white rounded-2xl shadow-xl border border-slate-100 overflow-hidden">
         <div class="bg-gradient-to-r flow-root from-blue-600 to-indigo-700 p-6 md:p-8 text-white">
             <h1 class="text-2xl md:text-3xl font-bold tracking-tight">⚡ Electric Bill Calculator</h1>
             <p class="text-blue-100 mt-1 text-sm md:text-base">Fully synchronized with your spreadsheet logic and formulas.</p>
         </div>
-
         <div class="p-6 md:p-8 grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div class="lg:col-span-1 space-y-4 bg-slate-50 p-5 rounded-xl border border-slate-200/60">
                 <h2 class="text-lg font-semibold text-slate-900 border-b border-slate-200 pb-2">Invoice Details</h2>
-                
                 <div class="grid grid-cols-2 gap-3">
                     <div>
                         <label class="block text-[10px] font-medium uppercase tracking-wider text-slate-500 mb-1">Invoice No.</label>
@@ -40,7 +35,6 @@
                         <input type="month" id="billingMonth" class="w-full bg-white border border-slate-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-blue-500">
                     </div>
                 </div>
-
                 <div class="grid grid-cols-2 gap-3">
                     <div>
                         <label class="block text-[10px] font-medium uppercase tracking-wider text-slate-500 mb-1">Transaction Date</label>
@@ -51,7 +45,6 @@
                         <input type="date" id="dueDate" class="w-full bg-white border border-slate-300 rounded-lg px-2 py-1.5 text-sm focus:outline-none focus:border-blue-500">
                     </div>
                 </div>
-
                 <div class="grid grid-cols-2 gap-3">
                     <div>
                         <label class="block text-[10px] font-medium uppercase tracking-wider text-slate-500 mb-1">Period From</label>
@@ -62,33 +55,27 @@
                         <input type="date" id="periodTo" class="w-full bg-white border border-slate-300 rounded-lg px-2 py-1.5 text-sm focus:outline-none focus:border-blue-500">
                     </div>
                 </div>
-                
                 <div class="pt-2">
                     <label class="block text-[10px] font-medium uppercase tracking-wider text-slate-500 mb-1">Total Amount Due</label>
                     <input type="number" id="totalAmount" step="0.01" class="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-sm font-semibold text-blue-600 focus:outline-none focus:border-blue-500">
                 </div>
-
                 <div>
                     <label class="block text-[10px] font-medium uppercase tracking-wider text-slate-500 mb-1">Total Energy Consumption (A) [kW]</label>
                     <input type="number" id="totalKw" step="0.1" class="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500">
                 </div>
-
                 <div class="pt-4 border-t border-slate-200 space-y-2">
                     <div class="flex justify-between items-center text-sm mb-2">
                         <span class="text-slate-600 font-medium">Price per kW (G):</span>
                         <span id="pricePerKw" class="font-bold text-indigo-600 text-base">0.0000</span>
                     </div>
-                    
                     <button onclick="saveInvoiceScreenshot()" class="w-full bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium py-2 rounded-lg transition cursor-pointer flex items-center justify-center gap-2">
                         📸 Take Screenshot
                     </button>
-
                     <button onclick="clearAllInputs()" class="w-full bg-slate-400 hover:bg-slate-500 text-white text-sm font-medium py-2 rounded-lg transition cursor-pointer flex items-center justify-center gap-2">
                         🔄 Clear All
                     </button>
                 </div>
             </div>
-
             <div class="lg:col-span-2 space-y-6">
                 <div id="captureArea" class="bg-white p-4 rounded-xl">
                     <h2 class="text-lg font-semibold text-slate-900 mb-4">Calculations Breakdown</h2>
@@ -105,9 +92,8 @@
                                     <th class="p-3 text-right">Payment kW (H)</th>
                                     <th class="p-3 text-right">Total Due</th>
                                 </tr>
-                            </thead>
-                            <tbody id="tenantRows" class="divide-y divide-slate-200 text-sm">
-                                </tbody>
+                            </table>
+                            <tbody id="tenantRows" class="divide-y divide-slate-200 text-sm"></tbody>
                             <tfoot class="text-xs font-semibold text-slate-900 border-t-2 border-slate-300 divide-y divide-slate-200">
                                 <tr class="bg-slate-50">
                                     <td class="p-3">subTotal (B)</td>
@@ -132,14 +118,7 @@
     </div>
 
     <script>
-        const initialTenants = [
-            { name: "Mama" },
-            { name: "Vhal" },
-            { name: "Liza" },
-            { name: "Erwin" }
-        ];
-
-        let summaryText = "";
+        const initialTenants = [{ name: "Mama" }, { name: "Vhal" }, { name: "Liza" }, { name: "Erwin" }];
 
         function saveToLocalStorage() {
             const data = {
@@ -153,46 +132,36 @@
                 totalKw: document.getElementById("totalKw").value,
                 tenants: {}
             };
-
-            // Save tenant data
             initialTenants.forEach((_, idx) => {
                 data.tenants[idx] = {
                     current: document.getElementById(`curr-${idx}`).value,
                     previous: document.getElementById(`prev-${idx}`).value
                 };
             });
-
             localStorage.setItem("billCalcData", JSON.stringify(data));
         }
 
-        function loadFromLocalStorage() {
-            const saved = localStorage.getItem("billCalcData");
-            if (saved) {
-                const data = JSON.parse(saved);
-                
-                document.getElementById("invoiceNo").value = data.invoiceNo || "";
-                document.getElementById("billingMonth").value = data.billingMonth || "";
-                document.getElementById("transDate").value = data.transDate || "";
-                document.getElementById("dueDate").value = data.dueDate || "";
-                document.getElementById("periodFrom").value = data.periodFrom || "";
-                document.getElementById("periodTo").value = data.periodTo || "";
-                document.getElementById("totalAmount").value = data.totalAmount || "";
-                document.getElementById("totalKw").value = data.totalKw || "";
-
-                // Load tenant data
-                initialTenants.forEach((_, idx) => {
-                    if (data.tenants[idx]) {
-                        document.getElementById(`curr-${idx}`).value = data.tenants[idx].current || "";
-                        document.getElementById(`prev-${idx}`).value = data.tenants[idx].previous || "";
-                    }
-                });
-            }
+        if (saved) {
+            const data = JSON.parse(saved);
+            document.getElementById("invoiceNo").value = data.invoiceNo || "";
+            document.getElementById("billingMonth").value = data.billingMonth || "";
+            document.getElementById("transDate").value = data.transDate || "";
+            document.getElementById("dueDate").value = data.dueDate || "";
+            document.getElementById("periodFrom").value = data.periodFrom || "";
+            document.getElementById("periodTo").value = data.periodTo || "";
+            document.getElementById("totalAmount").value = data.totalAmount || "";
+            document.getElementById("totalKw").value = data.totalKw || "";
+            initialTenants.forEach((_, idx) => {
+                if (data.tenants[idx]) {
+                    document.getElementById(`curr-${idx}`).value = data.tenants[idx].current || "";
+                    document.getElementById(`prev-${idx}`).value = data.tenants[idx].previous || "";
+                }
+            });
         }
 
         function initApp() {
             const tbody = document.getElementById("tenantRows");
             tbody.innerHTML = "";
-
             initialTenants.forEach((tenant, idx) => {
                 const row = document.createElement("tr");
                 row.className = "hover:bg-slate-50/80 transition-colors";
@@ -213,17 +182,9 @@
                 tbody.appendChild(row);
             });
 
-            // Update event listeners to include saveToLocalStorage
             document.getElementById("totalAmount").addEventListener("input", () => { calculateBill(); saveToLocalStorage(); });
             document.getElementById("totalKw").addEventListener("input", () => { calculateBill(); saveToLocalStorage(); });
-            document.getElementById("invoiceNo").addEventListener("input", () => { calculateBill(); saveToLocalStorage(); });
-            document.getElementById("billingMonth").addEventListener("input", () => { calculateBill(); saveToLocalStorage(); });
-            document.getElementById("transDate").addEventListener("input", () => { calculateBill(); saveToLocalStorage(); });
-            document.getElementById("dueDate").addEventListener("input", () => { calculateBill(); saveToLocalStorage(); });
-            document.getElementById("periodFrom").addEventListener("input", () => { calculateBill(); saveToLocalStorage(); });
-            document.getElementById("periodTo").addEventListener("input", () => { calculateBill(); saveToLocalStorage(); });
-
-            // Load saved data before calculating
+            
             loadFromLocalStorage();
             calculateBill();
         }
@@ -231,12 +192,10 @@
         function calculateBill() {
             const totalAmount = parseFloat(document.getElementById("totalAmount").value) || 0;
             const totalKw = parseFloat(document.getElementById("totalKw").value) || 0;
-
             const pricePerKw = totalKw > 0 ? (totalAmount / totalKw) : 0;
             document.getElementById("pricePerKw").textContent = pricePerKw.toFixed(4);
 
             let subtotalKw = 0;
-
             const tenantConsumptions = initialTenants.map((_, idx) => {
                 const prev = parseFloat(document.getElementById(`prev-${idx}`).value) || 0;
                 const curr = parseFloat(document.getElementById(`curr-${idx}`).value) || 0;
@@ -252,9 +211,9 @@
 
             let sumCost = 0;
             let sumPercent = 0;
-            let sumDeduct = 0;     
+            let sumDeduct = 0;
             let sumPaymentKw = 0;
-            
+
             initialTenants.forEach((tenant, idx) => {
                 const netKw = tenantConsumptions[idx];
                 const pct = subtotalKw > 0 ? (netKw / subtotalKw) : 0;
@@ -272,28 +231,15 @@
                 document.getElementById(`deduct-${idx}`).textContent = deduct.toFixed(2);
                 document.getElementById(`paykw-${idx}`).textContent = paymentKw.toFixed(2);
                 document.getElementById(`cost-${idx}`).textContent = tenantCost.toFixed(2);
-                document.getElementById("subtotalDeduct").textContent = sumDeduct.toFixed(2);
-                document.getElementById("subtotalPaymentKw").textContent = sumPaymentKw.toFixed(2);
             });
 
+            document.getElementById("subtotalDeduct").textContent = sumDeduct.toFixed(2);
+            document.getElementById("subtotalPaymentKw").textContent = sumPaymentKw.toFixed(2);
             document.getElementById("subtotalCost").textContent = sumCost.toFixed(2);
             document.getElementById("subtotalPercent").textContent = `${(sumPercent * 100).toFixed(1)}%`;
-
-            const invNo = document.getElementById("invoiceNo").value;
-            const bMonth = document.getElementById("billingMonth").value;
-            const dDate = document.getElementById("dueDate").value;
-            const pFrom = document.getElementById("periodFrom").value;
-            const pTo = document.getElementById("periodTo").value;
-
-            summaryText = `⚡ Electric Bill Breakdown
-Invoice: ${invNo}
-Billing Month: ${bMonth}
-Period: ${pFrom} to ${pTo}
-Due: ${dDate}`;
         }
-        
+
         function saveInvoiceScreenshot() {
-            // 1. Gather live contextual values directly from your input elements
             const invNo = document.getElementById("invoiceNo").value || "N/A";
             const billingMonth = document.getElementById("billingMonth").value || "N/A";
             const transDate = document.getElementById("transDate").value || "N/A";
@@ -303,48 +249,45 @@ Due: ${dDate}`;
             const totalAmount = document.getElementById("totalAmount").value || "0.00";
             const totalKw = document.getElementById("totalKw").value || "0.0";
             const pricePerKw = document.getElementById("pricePerKw").innerText || "0.0000";
-        
-            // 2. Initialize a high-fidelity standalone snapshot canvas
+
             const canvas = document.createElement("canvas");
             const ctx = canvas.getContext("2d");
-            
-            // Fixed standard desktop layout grid canvas dimensions
+
             canvas.width = 1100;
             canvas.height = 580;
-        
-            // Background fill
-            ctx.fillStyle = "#f8fafc"; // Tailwind slate-50
+
+            ctx.fillStyle = "#f8fafc";
             ctx.fillRect(0, 0, canvas.width, canvas.height);
-        
-            // 3. Render Top Banner (Matches blue-600 to indigo-700 gradient)
+
             const gradient = ctx.createLinearGradient(0, 0, canvas.width, 0);
             gradient.addColorStop(0, "#2563eb");
             gradient.addColorStop(1, "#4f46e5");
             ctx.fillStyle = gradient;
             ctx.fillRect(20, 20, 1060, 90);
-        
+
             ctx.fillStyle = "#ffffff";
             ctx.font = "bold 24px Inter, system-ui, sans-serif";
             ctx.fillText("⚡ Electric Bill Calculator", 45, 62);
+
             ctx.font = "14px Inter, system-ui, sans-serif";
             ctx.fillStyle = "#dbeafe";
             ctx.fillText("Fully synchronized with your spreadsheet logic and formulas.", 45, 88);
-        
-            // 4. COLUMN 1: Invoice details card container (Left Side)
+
             ctx.fillStyle = "#ffffff";
             ctx.fillRect(20, 130, 340, 430);
             ctx.strokeStyle = "#e2e8f0";
             ctx.lineWidth = 1;
             ctx.strokeRect(20, 130, 340, 430);
-        
+
             ctx.fillStyle = "#0f172a";
             ctx.font = "bold 16px Inter, system-ui, sans-serif";
             ctx.fillText("Invoice Details", 40, 165);
-            
-            // Draw horizontal separator rule line
-            ctx.beginPath(); ctx.moveTo(40, 178); ctx.lineTo(340, 178); ctx.stroke();
-        
-            // Utility text renderer macro for fields
+
+            ctx.beginPath();
+            ctx.moveTo(40, 178);
+            ctx.lineTo(340, 178);
+            ctx.stroke();
+
             const drawField = (label, val, x, y) => {
                 ctx.fillStyle = "#64748b";
                 ctx.font = "950 10px Inter, system-ui, sans-serif";
@@ -353,38 +296,33 @@ Due: ${dDate}`;
                 ctx.font = "500 14px Inter, system-ui, sans-serif";
                 ctx.fillText(val, x, y + 20);
             };
-        
+
             drawField("Invoice No.", invNo, 40, 210);
             drawField("Billing Month", billingMonth, 190, 210);
             drawField("Transaction Date", transDate, 40, 265);
             drawField("Bill Due Date", dueDate, 190, 265);
             drawField("Period From", periodFrom, 40, 320);
             drawField("Period To", periodTo, 190, 320);
-        
-            // Render Highlights For Total Metrics
+
             drawField("Total Amount Due", `₱ ${totalAmount}`, 40, 385);
             drawField("Total Energy Consumption (A)", `${totalKw} kW`, 40, 445);
-        
-            // Cost Per kW Block
+
             ctx.fillStyle = "#eef2ff";
             ctx.fillRect(40, 495, 300, 45);
             ctx.fillStyle = "#4f46e5";
             ctx.font = "bold 13px Inter, system-ui, sans-serif";
             ctx.fillText(`Price per kW (G):   ₱ ${pricePerKw}`, 55, 522);
-        
-            // 5. COLUMN 2: Calculations Breakdown Grid (Right Side)
+
             ctx.fillStyle = "#ffffff";
             ctx.fillRect(380, 130, 700, 430);
             ctx.strokeRect(380, 130, 700, 430);
-        
+
             ctx.fillStyle = "#0f172a";
             ctx.font = "bold 16px Inter, system-ui, sans-serif";
             ctx.fillText("Calculations Breakdown", 400, 165);
-        
-            // Render Data Breakdown Table Headers
+
             ctx.fillStyle = "#f1f5f9";
             ctx.fillRect(400, 190, 660, 35);
-            
             ctx.fillStyle = "#475569";
             ctx.font = "bold 11px Inter, system-ui, sans-serif";
             ctx.fillText("TENANT", 410, 212);
@@ -395,20 +333,19 @@ Due: ${dDate}`;
             ctx.fillText("DEDUCT (F)", 840, 212);
             ctx.fillText("PAY kW (H)", 930, 212);
             ctx.fillText("TOTAL DUE", 1010, 212);
-        
-            // Loop through rows to extract real-time dynamic tenant table data values
+
             initialTenants.forEach((tenant, idx) => {
                 const yPos = 260 + (idx * 42);
-                
-                // Add divider line between rows
                 ctx.strokeStyle = "#f1f5f9";
-                ctx.beginPath(); ctx.moveTo(400, yPos - 18); ctx.lineTo(1060, yPos - 18); ctx.stroke();
-        
+                ctx.beginPath();
+                ctx.moveTo(400, yPos - 18);
+                ctx.lineTo(1060, yPos - 18);
+                ctx.stroke();
+
                 ctx.fillStyle = "#0f172a";
                 ctx.font = "bold 13px Inter, system-ui, sans-serif";
                 ctx.fillText(tenant.name, 410, yPos);
-        
-                // Fetch inputs safely
+
                 const curr = document.getElementById(`curr-${idx}`).value || "0";
                 const prev = document.getElementById(`prev-${idx}`).value || "0";
                 const net = document.getElementById(`net-${idx}`).innerText;
@@ -416,14 +353,14 @@ Due: ${dDate}`;
                 const deduct = document.getElementById(`deduct-${idx}`).innerText;
                 const paykw = document.getElementById(`paykw-${idx}`).innerText;
                 const cost = document.getElementById(`cost-${idx}`).innerText;
-        
+
                 ctx.font = "13px monospace";
                 ctx.fillStyle = "#334155";
                 ctx.fillText(curr, 500, yPos);
                 ctx.fillText(prev, 580, yPos);
                 ctx.fillText(net, 665, yPos);
                 ctx.fillText(pct, 745, yPos);
-                ctx.fillStyle = "#dc2626"; // Red text for deductions
+                ctx.fillStyle = "#dc2626";
                 ctx.fillText(deduct, 840, yPos);
                 ctx.fillStyle = "#334155";
                 ctx.fillText(paykw, 930, yPos);
@@ -431,20 +368,21 @@ Due: ${dDate}`;
                 ctx.font = "bold 13px monospace";
                 ctx.fillText(cost, 1010, yPos);
             });
-        
-            // 6. Draw Table Footer (Subtotals & Excess metrics)
+
             const footerY = 435;
             ctx.strokeStyle = "#cbd5e1";
             ctx.lineWidth = 2;
-            ctx.beginPath(); ctx.moveTo(400, footerY); ctx.lineTo(1060, footerY); ctx.stroke();
-        
+            ctx.beginPath();
+            ctx.moveTo(400, footerY);
+            ctx.lineTo(1060, footerY);
+            ctx.stroke();
+
             ctx.fillStyle = "#f8fafc";
             ctx.fillRect(400, footerY + 2, 660, 35);
-            
             ctx.fillStyle = "#0f172a";
             ctx.font = "bold 12px Inter, system-ui, sans-serif";
             ctx.fillText("subTotal (B)", 410, footerY + 24);
-        
+
             ctx.font = "bold 12px monospace";
             ctx.fillText(document.getElementById("subtotalKw").innerText, 665, footerY + 24);
             ctx.fillText(document.getElementById("subtotalPercent").innerText, 745, footerY + 24);
@@ -452,30 +390,26 @@ Due: ${dDate}`;
             ctx.fillText(document.getElementById("subtotalPaymentKw").innerText, 930, footerY + 24);
             ctx.fillStyle = "#2563eb";
             ctx.fillText(document.getElementById("subtotalCost").innerText, 1010, footerY + 24);
-        
-            // Excess Metrics Banner Row
-            ctx.fillStyle = "#fef3c7"; // Tailwind amber-50
+
+            ctx.fillStyle = "#fef3c7";
             ctx.fillRect(400, footerY + 45, 660, 45);
             ctx.strokeStyle = "#fde68a";
             ctx.lineWidth = 1;
             ctx.strokeRect(400, footerY + 45, 660, 45);
-        
-            ctx.fillStyle = "#78350f"; // Amber-900
+
+            ctx.fillStyle = "#78350f";
             ctx.font = "bold 12px Inter, system-ui, sans-serif";
             ctx.fillText("Total kW Excess (E) [B - A]:", 415, footerY + 72);
             ctx.font = "bold 13px monospace";
             ctx.fillText(document.getElementById("excessKw").innerText, 600, footerY + 72);
-        
             ctx.fillStyle = "#92400e";
             ctx.font = "italic 11px Inter, system-ui, sans-serif";
             ctx.fillText("Calculated as: subTotal (B) - Total Consumption (A)", 715, footerY + 72);
-        
-            // 7. Process compilation to image download link stream natively
+
             try {
                 const downloadLink = document.createElement('a');
                 downloadLink.download = `electric-bill-calculator-${invNo}.png`;
                 downloadLink.href = canvas.toDataURL("image/png");
-                
                 document.body.appendChild(downloadLink);
                 downloadLink.click();
                 document.body.removeChild(downloadLink);
@@ -484,7 +418,7 @@ Due: ${dDate}`;
                 alert('Could not compile image asset stream natively.');
             }
         }
-        
+
         function clearAllInputs() {
             document.querySelectorAll("input").forEach(i => i.value = "");
             localStorage.removeItem("billCalcData");
@@ -492,6 +426,5 @@ Due: ${dDate}`;
 
         window.onload = initApp;
     </script>
-
 </body>
 </html>
