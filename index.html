@@ -305,34 +305,42 @@ function saveInvoiceScreenshot() {
         return;
     }
 
-    // 2. Read the full internal scroll sizes so it captures the layout 
-    // even if the screen is currently small, resized, or mobile view.
-    const fullWidth = elementToCapture.scrollWidth;
-    const fullHeight = elementToCapture.scrollHeight;
+    // 2. Clone the element to isolate it from the active resizing browser window
+    const clone = elementToCapture.cloneNode(true);
+    
+    // 3. Place the clone into an off-screen desktop sandbox container
+    const sandbox = document.createElement("div");
+    sandbox.style.position = "absolute";
+    sandbox.style.top = "-9999px";
+    sandbox.style.left = "-9999px";
+    sandbox.style.width = "1152px"; // Max-w-6xl standard desktop width
+    sandbox.style.backgroundColor = "#ffffff";
+    
+    sandbox.appendChild(clone);
+    document.body.appendChild(sandbox);
 
-    // 3. Capture the container using its absolute unclipped dimensions
-    htmlToImage.toPng(elementToCapture, { 
-        quality: 1,
-        backgroundColor: '#ffffff',
-        width: fullWidth,
-        height: fullHeight,
-        style: {
-            transform: 'scale(1)',
-            transformOrigin: 'top left',
-            width: fullWidth + 'px',
-            height: fullHeight + 'px',
-            maxWidth: 'none',
-            maxHeight: 'none'
+    // 4. Force all inputs in the clone to display their current values
+    // (Cloned inputs default to empty if we don't manually map them)
+    const originalInputs = elementToCapture.querySelectorAll("input");
+    const clonedInputs = clone.querySelectorAll("input");
+    originalInputs.forEach((input, index) => {
+        if (clonedInputs[index]) {
+            clonedInputs[index].value = input.value;
         }
+    });
+
+    // 5. Snapshot the stable, unclipped sandbox container
+    htmlToImage.toPng(sandbox, { 
+        quality: 1,
+        backgroundColor: '#ffffff'
     })
     .then(function (dataUrl) {
-        // 4. Setup the automatic file saving link
+        // 6. Setup and prompt the automatic download
         const downloadLink = document.createElement('a');
         const invNo = document.getElementById("invoiceNo").value || "summary";
         downloadLink.download = `electric-bill-calculator-${invNo}.png`;
         downloadLink.href = dataUrl;
         
-        // 5. Prompt the file save download
         document.body.appendChild(downloadLink);
         downloadLink.click();
         document.body.removeChild(downloadLink);
@@ -340,6 +348,10 @@ function saveInvoiceScreenshot() {
     .catch(function (error) {
         console.error('Screenshot generation crashed:', error);
         alert('Could not capture screenshot. Try using the "Copy Text Summary" instead!');
+    })
+    .finally(function () {
+        // 7. Always clean up and delete the temporary sandbox element
+        document.body.removeChild(sandbox);
     });
 }
  
