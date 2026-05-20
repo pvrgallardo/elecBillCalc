@@ -7,8 +7,16 @@
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-        body { font-family: 'Inter', sans-serif; }
+            @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+            body { font-family: 'Inter', sans-serif; }
+
+            /* Hides everything except the invoice summary card when saving */
+            @media print {
+                body { background: white !important; p: 0 !important; }
+                .lg\:col-span-1, h1, p.text-blue-100 { display: none !important; }
+                .max-w-6xl { shadow: none !important; border: none !important; }
+                #captureArea { width: 100% !important; p: 0 !important; }
+            }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-800 min-h-screen p-4 md:p-8">
@@ -289,54 +297,12 @@ Due: ${dDate}`;
         }
 
 function shareToMessenger() {
-    const elementToCapture = document.getElementById("captureArea");
+    // 1. Open Messenger immediately so the browser's popup blocker doesn't interfere
+    window.open("https://www.messenger.com/", "_blank");
 
-    if (!elementToCapture) {
-        alert("Error: Capture area not found.");
-        return;
-    }
-
-    // 1. Open Messenger immediately so the browser's popup blocker doesn't catch it
-    const messengerWindow = window.open("https://www.messenger.com/", "_blank");
-
-    // 2. Clone the element and isolate it off-screen to prevent layout breaking
-    const clonedElement = elementToCapture.cloneNode(true);
-    clonedElement.style.position = "absolute";
-    clonedElement.style.top = "-9999px";
-    clonedElement.style.left = "-9999px";
-    clonedElement.style.width = elementToCapture.offsetWidth + "px";
-    clonedElement.style.backgroundColor = "#ffffff";
-    document.body.appendChild(clonedElement);
-
-    // 3. Render the isolated element to canvas
-    html2canvas(clonedElement, {
-        scale: 2,
-        backgroundColor: "#ffffff",
-        useCORS: false,
-        allowTaint: true,
-        logging: false,
-        ignoreElements: (el) => el.tagName === 'SCRIPT'
-    }).then(canvas => {
-        try {
-            // 4. Create an explicit downloadable anchor link
-            const downloadLink = document.createElement("a");
-            downloadLink.href = canvas.toDataURL("image/png");
-            downloadLink.download = "electric-bill-breakdown.png";
-            
-            // 5. Force the link into the document body to satisfy browser security
-            document.body.appendChild(downloadLink);
-            downloadLink.click();
-            document.body.removeChild(downloadLink);
-        } catch (error) {
-            console.error("Image generation crashed:", error);
-        } finally {
-            // Clean up the off-screen cloned element
-            document.body.removeChild(clonedElement);
-        }
-    }).catch(err => {
-        console.error("html2canvas completely failed:", err);
-        if (messengerWindow) messengerWindow.focus();
-    });
+    // 2. Trigger the browser's built-in print utility
+    // This allows the user to cleanly "Save as PDF" or "Save as Image" with perfect styling
+    window.print();
 }
  
         function clearAllInputs() {
