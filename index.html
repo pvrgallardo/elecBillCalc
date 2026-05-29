@@ -254,7 +254,7 @@
         function calculateBill() {
             const amountDue   = parseFloat(document.getElementById("amountDue").value) || 0;
             const billArrears = parseFloat(document.getElementById("billArrears").value) || 0;
-            const totalAmount = amountDue + billArrears;
+            const totalAmount = amountDue - billArrears;
             const totalKw     = parseFloat(document.getElementById("totalKw").value) || 0;
 
             // Display computed total
