@@ -10,8 +10,8 @@
         body { font-family: 'Inter', sans-serif; }
         @media print {
             body { background: #ffffff !important; padding: 0 !important; }
-            .lg\:col-span-1, h1, p.text-blue-100 { display: none !important; }
-            .max-w-6xl { shadow: none !important; border: none !important; margin: 0 !important; width: 100% !important; }
+            .lg\:col-span-1, h1 { display: none !important; }
+            .max-w-7xl { shadow: none !important; border: none !important; margin: 0 !important; width: 100% !important; }
             #captureArea { width: 100% !important; padding: 0 !important; }
         }
     </style>
@@ -22,9 +22,11 @@
             <h1 class="text-2xl md:text-3xl font-bold tracking-tight">⚡ Electric Bill Calculator</h1>
         </div>
         <div class="p-6 md:p-8 grid grid-cols-1 lg:grid-cols-3 gap-8">
+
             <!-- LEFT PANEL -->
             <div class="lg:col-span-1 space-y-4 bg-slate-50 p-5 rounded-xl border border-slate-200/60">
                 <h2 class="text-lg font-semibold text-slate-900 border-b border-slate-200 pb-2">Invoice Details</h2>
+
                 <div class="grid grid-cols-2 gap-3">
                     <div>
                         <label class="block text-[10px] font-medium uppercase tracking-wider text-slate-500 mb-1">Invoice No.</label>
@@ -35,6 +37,7 @@
                         <input type="month" id="billingMonth" class="w-full bg-white border border-slate-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-blue-500">
                     </div>
                 </div>
+
                 <div class="grid grid-cols-2 gap-3">
                     <div>
                         <label class="block text-[10px] font-medium uppercase tracking-wider text-slate-500 mb-1">Transaction Date</label>
@@ -45,6 +48,7 @@
                         <input type="date" id="dueDate" class="w-full bg-white border border-slate-300 rounded-lg px-2 py-1.5 text-sm focus:outline-none focus:border-blue-500">
                     </div>
                 </div>
+
                 <div class="grid grid-cols-2 gap-3">
                     <div>
                         <label class="block text-[10px] font-medium uppercase tracking-wider text-slate-500 mb-1">Period From</label>
@@ -55,26 +59,48 @@
                         <input type="date" id="periodTo" class="w-full bg-white border border-slate-300 rounded-lg px-2 py-1.5 text-sm focus:outline-none focus:border-blue-500">
                     </div>
                 </div>
-                <div class="pt-2">
-                    <label class="block text-[10px] font-medium uppercase tracking-wider text-slate-500 mb-1">Total Amount Due</label>
-                    <input type="number" id="totalAmount" step="0.01" class="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-sm font-semibold text-blue-600 focus:outline-none focus:border-blue-500">
+
+                <!-- Amount breakdown box -->
+                <div class="pt-2 rounded-xl border border-slate-200 bg-white overflow-hidden">
+                    <div class="bg-slate-100 px-3 py-2">
+                        <span class="text-[10px] font-semibold uppercase tracking-wider text-slate-500">Amount Breakdown</span>
+                    </div>
+                    <div class="p-3 space-y-3">
+                        <div>
+                            <label class="block text-[10px] font-medium uppercase tracking-wider text-slate-500 mb-1">Amount Due</label>
+                            <input type="number" id="amountDue" step="0.01" placeholder="0.00"
+                                class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-sm font-semibold text-blue-600 focus:outline-none focus:border-blue-500">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-medium uppercase tracking-wider text-amber-600 mb-1">Bill Arrears</label>
+                            <input type="number" id="billArrears" step="0.01" placeholder="0.00"
+                                class="w-full bg-amber-50 border border-amber-300 rounded-lg px-3 py-2 text-sm font-semibold text-amber-700 focus:outline-none focus:border-amber-500">
+                        </div>
+                        <div class="pt-1 border-t border-slate-200">
+                            <label class="block text-[10px] font-medium uppercase tracking-wider text-slate-500 mb-1">Total Amount Due <span class="text-slate-400 normal-case font-normal">(Amount Due + Bill Arrears)</span></label>
+                            <div class="w-full bg-blue-50 border border-blue-200 rounded-lg px-3 py-2 text-sm font-bold text-blue-700 font-mono" id="totalAmountDisplay">0.00</div>
+                        </div>
+                    </div>
                 </div>
+
                 <div>
                     <label class="block text-[10px] font-medium uppercase tracking-wider text-slate-500 mb-1">Total Energy Consumption (A) [kW]</label>
                     <input type="number" id="totalKw" step="0.1" class="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500">
                 </div>
+
                 <div class="pt-4 border-t border-slate-200 space-y-2">
-                    <div class="flex justify-between items-center text-sm mb-2">
+                    <div class="flex justify-between items-center text-sm">
                         <span class="text-slate-600 font-medium">Price per kW (G):</span>
                         <span id="pricePerKw" class="font-bold text-indigo-600 text-base">0.00</span>
                     </div>
-                    <div class="pt-4 border-t border-slate-200 flex flex-row gap-2">
-                      <button onclick="saveInvoiceScreenshot()" class="w-1/2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium py-2 rounded-lg transition cursor-pointer flex items-center justify-center gap-2">
-                        📸 Take Screenshot
-                      </button>
-                      <button onclick="clearAllInputs()" class="w-1/2 bg-slate-400 hover:bg-slate-500 text-white text-sm font-medium py-2 rounded-lg transition cursor-pointer flex items-center justify-center gap-2">
-                        🔄 Clear All
-                      </button>
+                    <p class="text-[10px] text-slate-400 italic">= Amount Due ÷ Total Energy Consumption (A)</p>
+                    <div class="pt-3 border-t border-slate-200 flex flex-row gap-2">
+                        <button onclick="saveInvoiceScreenshot()" class="w-1/2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium py-2 rounded-lg transition cursor-pointer flex items-center justify-center gap-2">
+                            📸 Screenshot
+                        </button>
+                        <button onclick="clearAllInputs()" class="w-1/2 bg-slate-400 hover:bg-slate-500 text-white text-sm font-medium py-2 rounded-lg transition cursor-pointer flex items-center justify-center gap-2">
+                            🔄 Clear All
+                        </button>
                     </div>
                 </div>
             </div>
@@ -136,7 +162,8 @@
                 dueDate: document.getElementById("dueDate").value,
                 periodFrom: document.getElementById("periodFrom").value,
                 periodTo: document.getElementById("periodTo").value,
-                totalAmount: document.getElementById("totalAmount").value,
+                amountDue: document.getElementById("amountDue").value,
+                billArrears: document.getElementById("billArrears").value,
                 totalKw: document.getElementById("totalKw").value,
                 tenants: {}
             };
@@ -160,7 +187,8 @@
                 document.getElementById("dueDate").value = data.dueDate || "";
                 document.getElementById("periodFrom").value = data.periodFrom || "";
                 document.getElementById("periodTo").value = data.periodTo || "";
-                document.getElementById("totalAmount").value = data.totalAmount || "";
+                document.getElementById("amountDue").value = data.amountDue || "";
+                document.getElementById("billArrears").value = data.billArrears || "";
                 document.getElementById("totalKw").value = data.totalKw || "";
                 initialTenants.forEach((_, idx) => {
                     if (data.tenants[idx]) {
@@ -173,14 +201,9 @@
         }
 
         function clearAllInputs() {
-            document.getElementById("invoiceNo").value = "";
-            document.getElementById("billingMonth").value = "";
-            document.getElementById("transDate").value = "";
-            document.getElementById("dueDate").value = "";
-            document.getElementById("periodFrom").value = "";
-            document.getElementById("periodTo").value = "";
-            document.getElementById("totalAmount").value = "";
-            document.getElementById("totalKw").value = "";
+            ["invoiceNo","billingMonth","transDate","dueDate","periodFrom","periodTo","amountDue","billArrears","totalKw"].forEach(id => {
+                document.getElementById(id).value = "";
+            });
             initialTenants.forEach((_, idx) => {
                 document.getElementById(`curr-${idx}`).value = "";
                 document.getElementById(`prev-${idx}`).value = "";
@@ -199,10 +222,12 @@
                 row.innerHTML = `
                     <td class="p-3 font-medium text-slate-900">${tenant.name}</td>
                     <td class="p-1.5">
-                        <input type="number" id="curr-${idx}" oninput="calculateBill(); saveToLocalStorage();" class="w-full bg-slate-50 border border-slate-200 rounded px-2 py-1 text-xs focus:bg-white focus:outline-none focus:border-blue-400">
+                        <input type="number" id="curr-${idx}" oninput="calculateBill(); saveToLocalStorage();"
+                            class="w-full bg-slate-50 border border-slate-200 rounded px-2 py-1 text-xs focus:bg-white focus:outline-none focus:border-blue-400">
                     </td>
                     <td class="p-1.5">
-                        <input type="number" id="prev-${idx}" oninput="calculateBill(); saveToLocalStorage();" class="w-full bg-slate-50 border border-slate-200 rounded px-2 py-1 text-xs focus:bg-white focus:outline-none focus:border-blue-400">
+                        <input type="number" id="prev-${idx}" oninput="calculateBill(); saveToLocalStorage();"
+                            class="w-full bg-slate-50 border border-slate-200 rounded px-2 py-1 text-xs focus:bg-white focus:outline-none focus:border-blue-400">
                     </td>
                     <td id="net-${idx}" class="p-3 text-right font-mono text-xs text-slate-600">0.00</td>
                     <td id="pct-${idx}" class="p-3 text-right font-mono text-xs text-slate-600">0.0%</td>
@@ -210,24 +235,33 @@
                     <td id="paykw-${idx}" class="p-3 text-right font-mono text-xs text-slate-600">0.00</td>
                     <td id="cost-${idx}" class="p-3 text-right font-semibold font-mono text-slate-900">0.00</td>
                     <td class="p-1.5 bg-amber-50/30">
-                        <input type="number" id="arrears-${idx}" step="0.01" oninput="calculateBill(); saveToLocalStorage();" placeholder="0.00" class="w-full bg-amber-50 border border-amber-200 rounded px-2 py-1 text-xs text-amber-800 focus:bg-white focus:outline-none focus:border-amber-400">
+                        <input type="number" id="arrears-${idx}" step="0.01" oninput="calculateBill(); saveToLocalStorage();" placeholder="0.00"
+                            class="w-full bg-amber-50 border border-amber-200 rounded px-2 py-1 text-xs text-amber-800 focus:bg-white focus:outline-none focus:border-amber-400">
                     </td>
                     <td id="finaltotal-${idx}" class="p-3 text-right font-bold font-mono text-emerald-700 bg-emerald-50/30">0.00</td>
                 `;
                 tbody.appendChild(row);
             });
 
-            document.getElementById("totalAmount").addEventListener("input", () => { calculateBill(); saveToLocalStorage(); });
-            document.getElementById("totalKw").addEventListener("input", () => { calculateBill(); saveToLocalStorage(); });
+            ["amountDue", "billArrears", "totalKw"].forEach(id => {
+                document.getElementById(id).addEventListener("input", () => { calculateBill(); saveToLocalStorage(); });
+            });
 
             loadFromLocalStorage();
             calculateBill();
         }
 
         function calculateBill() {
-            const totalAmount = parseFloat(document.getElementById("totalAmount").value) || 0;
-            const totalKw = parseFloat(document.getElementById("totalKw").value) || 0;
-            const pricePerKw = totalKw > 0 ? (totalAmount / totalKw) : 0;
+            const amountDue   = parseFloat(document.getElementById("amountDue").value) || 0;
+            const billArrears = parseFloat(document.getElementById("billArrears").value) || 0;
+            const totalAmount = amountDue + billArrears;
+            const totalKw     = parseFloat(document.getElementById("totalKw").value) || 0;
+
+            // Display computed total
+            document.getElementById("totalAmountDisplay").textContent = totalAmount.toFixed(2);
+
+            // Price per kW = Amount Due / Total Energy Consumption (A)
+            const pricePerKw = totalKw > 0 ? (amountDue / totalKw) : 0;
             document.getElementById("pricePerKw").textContent = pricePerKw.toFixed(2);
 
             let subtotalKw = 0;
@@ -246,53 +280,55 @@
 
             let sumCost = 0, sumPercent = 0, sumDeduct = 0, sumPaymentKw = 0, sumArrears = 0, sumFinalTotal = 0;
 
-            initialTenants.forEach((tenant, idx) => {
-                const netKw = tenantConsumptions[idx];
-                const pct = subtotalKw > 0 ? (netKw / subtotalKw) : 0;
-                const deduct = excessKw * pct;
-                const paymentKw = netKw - deduct;
+            initialTenants.forEach((_, idx) => {
+                const netKw      = tenantConsumptions[idx];
+                const pct        = subtotalKw > 0 ? (netKw / subtotalKw) : 0;
+                const deduct     = excessKw * pct;
+                const paymentKw  = netKw - deduct;
                 const tenantCost = paymentKw * pricePerKw;
-                const arrears = parseFloat(document.getElementById(`arrears-${idx}`).value) || 0;
+                const arrears    = parseFloat(document.getElementById(`arrears-${idx}`).value) || 0;
                 const finalTotal = tenantCost + arrears;
 
-                sumCost += tenantCost;
-                sumPercent += pct;
-                sumDeduct += deduct;
-                sumPaymentKw += paymentKw;
-                sumArrears += arrears;
+                sumCost       += tenantCost;
+                sumPercent    += pct;
+                sumDeduct     += deduct;
+                sumPaymentKw  += paymentKw;
+                sumArrears    += arrears;
                 sumFinalTotal += finalTotal;
 
-                document.getElementById(`net-${idx}`).textContent = netKw.toFixed(2);
-                document.getElementById(`pct-${idx}`).textContent = `${(pct * 100).toFixed(1)}%`;
-                document.getElementById(`deduct-${idx}`).textContent = deduct.toFixed(2);
-                document.getElementById(`paykw-${idx}`).textContent = paymentKw.toFixed(2);
-                document.getElementById(`cost-${idx}`).textContent = tenantCost.toFixed(2);
+                document.getElementById(`net-${idx}`).textContent        = netKw.toFixed(2);
+                document.getElementById(`pct-${idx}`).textContent        = `${(pct * 100).toFixed(1)}%`;
+                document.getElementById(`deduct-${idx}`).textContent     = deduct.toFixed(2);
+                document.getElementById(`paykw-${idx}`).textContent      = paymentKw.toFixed(2);
+                document.getElementById(`cost-${idx}`).textContent       = tenantCost.toFixed(2);
                 document.getElementById(`finaltotal-${idx}`).textContent = finalTotal.toFixed(2);
             });
 
-            document.getElementById("subtotalDeduct").textContent = sumDeduct.toFixed(2);
-            document.getElementById("subtotalPaymentKw").textContent = sumPaymentKw.toFixed(2);
-            document.getElementById("subtotalCost").textContent = sumCost.toFixed(2);
-            document.getElementById("subtotalPercent").textContent = `${(sumPercent * 100).toFixed(1)}%`;
-            document.getElementById("subtotalArrears").textContent = sumArrears.toFixed(2);
-            document.getElementById("subtotalFinalTotal").textContent = sumFinalTotal.toFixed(2);
+            document.getElementById("subtotalDeduct").textContent      = sumDeduct.toFixed(2);
+            document.getElementById("subtotalPaymentKw").textContent   = sumPaymentKw.toFixed(2);
+            document.getElementById("subtotalCost").textContent        = sumCost.toFixed(2);
+            document.getElementById("subtotalPercent").textContent     = `${(sumPercent * 100).toFixed(1)}%`;
+            document.getElementById("subtotalArrears").textContent     = sumArrears.toFixed(2);
+            document.getElementById("subtotalFinalTotal").textContent  = sumFinalTotal.toFixed(2);
         }
 
         function saveInvoiceScreenshot() {
-            const invNo = document.getElementById("invoiceNo").value || "N/A";
-            const billingMonth = document.getElementById("billingMonth").value || "N/A";
-            const transDate = document.getElementById("transDate").value || "N/A";
-            const dueDate = document.getElementById("dueDate").value || "N/A";
-            const periodFrom = document.getElementById("periodFrom").value || "N/A";
-            const periodTo = document.getElementById("periodTo").value || "N/A";
-            const totalAmount = document.getElementById("totalAmount").value || "0.00";
-            const totalKw = document.getElementById("totalKw").value || "0.0";
-            const pricePerKw = document.getElementById("pricePerKw").innerText || "0.00";
+            const invNo           = document.getElementById("invoiceNo").value || "N/A";
+            const billingMonth    = document.getElementById("billingMonth").value || "N/A";
+            const transDate       = document.getElementById("transDate").value || "N/A";
+            const dueDate         = document.getElementById("dueDate").value || "N/A";
+            const periodFrom      = document.getElementById("periodFrom").value || "N/A";
+            const periodTo        = document.getElementById("periodTo").value || "N/A";
+            const amountDue       = document.getElementById("amountDue").value || "0.00";
+            const billArrears     = document.getElementById("billArrears").value || "0.00";
+            const totalAmountDisp = document.getElementById("totalAmountDisplay").textContent || "0.00";
+            const totalKw         = document.getElementById("totalKw").value || "0.0";
+            const pricePerKw      = document.getElementById("pricePerKw").innerText || "0.00";
 
             const canvas = document.createElement("canvas");
             const ctx = canvas.getContext("2d");
             canvas.width = 1300;
-            canvas.height = 620;
+            canvas.height = 660;
 
             ctx.fillStyle = "#f8fafc";
             ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -302,7 +338,6 @@
             gradient.addColorStop(1, "#4f46e5");
             ctx.fillStyle = gradient;
             ctx.fillRect(20, 20, canvas.width - 40, 90);
-
             ctx.fillStyle = "#ffffff";
             ctx.font = "bold 24px Inter, system-ui, sans-serif";
             ctx.fillText("⚡ Electric Bill Calculator", 45, 62);
@@ -311,11 +346,9 @@
             ctx.fillText("Fully synchronized with your spreadsheet logic and formulas.", 45, 88);
 
             ctx.fillStyle = "#ffffff";
-            ctx.fillRect(20, 130, 340, 460);
-            ctx.strokeStyle = "#e2e8f0";
-            ctx.lineWidth = 1;
-            ctx.strokeRect(20, 130, 340, 460);
-
+            ctx.fillRect(20, 130, 340, 500);
+            ctx.strokeStyle = "#e2e8f0"; ctx.lineWidth = 1;
+            ctx.strokeRect(20, 130, 340, 500);
             ctx.fillStyle = "#0f172a";
             ctx.font = "bold 16px Inter, system-ui, sans-serif";
             ctx.fillText("Invoice Details", 40, 165);
@@ -323,10 +356,10 @@
 
             const drawField = (label, val, x, y) => {
                 ctx.fillStyle = "#64748b";
-                ctx.font = "950 10px Inter, system-ui, sans-serif";
+                ctx.font = "bold 10px Inter, system-ui, sans-serif";
                 ctx.fillText(label.toUpperCase(), x, y);
                 ctx.fillStyle = "#1e293b";
-                ctx.font = "500 14px Inter, system-ui, sans-serif";
+                ctx.font = "14px Inter, system-ui, sans-serif";
                 ctx.fillText(val, x, y + 20);
             };
 
@@ -336,40 +369,49 @@
             drawField("Bill Due Date", dueDate, 190, 265);
             drawField("Period From", periodFrom, 40, 320);
             drawField("Period To", periodTo, 190, 320);
-            drawField("Total Amount Due", `₱ ${totalAmount}`, 40, 385);
-            drawField("Total Energy Consumption (A)", `${totalKw} kW`, 40, 445);
+
+            ctx.fillStyle = "#f1f5f9";
+            ctx.fillRect(40, 365, 300, 130);
+            ctx.strokeStyle = "#e2e8f0"; ctx.strokeRect(40, 365, 300, 130);
+            ctx.fillStyle = "#475569"; ctx.font = "bold 10px Inter, system-ui, sans-serif";
+            ctx.fillText("AMOUNT BREAKDOWN", 50, 382);
+            drawField("Amount Due", `₱ ${amountDue}`, 50, 400);
+            drawField("Bill Arrears", `₱ ${billArrears}`, 190, 400);
+            ctx.fillStyle = "#dbeafe";
+            ctx.fillRect(50, 430, 280, 32);
+            ctx.fillStyle = "#1e40af"; ctx.font = "bold 12px Inter, system-ui, sans-serif";
+            ctx.fillText("Total Amount Due:", 58, 450);
+            ctx.fillText(`₱ ${totalAmountDisp}`, 220, 450);
+
+            drawField("Total Energy Consumption (A)", `${totalKw} kW`, 40, 520);
 
             ctx.fillStyle = "#eef2ff";
-            ctx.fillRect(40, 495, 300, 45);
-            ctx.fillStyle = "#4f46e5";
-            ctx.font = "bold 13px Inter, system-ui, sans-serif";
-            ctx.fillText(`Price per kW (G):   ₱ ${pricePerKw}`, 55, 522);
+            ctx.fillRect(40, 555, 300, 45);
+            ctx.fillStyle = "#4f46e5"; ctx.font = "bold 13px Inter, system-ui, sans-serif";
+            ctx.fillText(`Price per kW (G):   ₱ ${pricePerKw}`, 55, 582);
 
             const tableX = 380;
             const tableW = canvas.width - tableX - 20;
             ctx.fillStyle = "#ffffff";
-            ctx.fillRect(tableX, 130, tableW, 460);
-            ctx.strokeRect(tableX, 130, tableW, 460);
-
-            ctx.fillStyle = "#0f172a";
-            ctx.font = "bold 16px Inter, system-ui, sans-serif";
+            ctx.fillRect(tableX, 130, tableW, 500);
+            ctx.strokeStyle = "#e2e8f0"; ctx.strokeRect(tableX, 130, tableW, 500);
+            ctx.fillStyle = "#0f172a"; ctx.font = "bold 16px Inter, system-ui, sans-serif";
             ctx.fillText("Calculations Breakdown", tableX + 20, 165);
 
             ctx.fillStyle = "#f1f5f9";
             ctx.fillRect(tableX + 20, 190, tableW - 40, 35);
-            ctx.fillStyle = "#475569";
-            ctx.font = "bold 9.5px Inter, system-ui, sans-serif";
+            ctx.fillStyle = "#475569"; ctx.font = "bold 9.5px Inter, system-ui, sans-serif";
 
             const cols = [
-                { label: "TENANT", x: tableX + 30 },
-                { label: "CURRENT", x: tableX + 100 },
-                { label: "PREVIOUS", x: tableX + 170 },
-                { label: "TOTAL (C)", x: tableX + 250 },
-                { label: "PCT (D)", x: tableX + 330 },
-                { label: "DEDUCT (F)", x: tableX + 400 },
-                { label: "PAY kW (H)", x: tableX + 485 },
-                { label: "TOTAL DUE", x: tableX + 570 },
-                { label: "ARREARS", x: tableX + 660 },
+                { label: "TENANT",      x: tableX + 30  },
+                { label: "CURRENT",     x: tableX + 100 },
+                { label: "PREVIOUS",    x: tableX + 170 },
+                { label: "TOTAL (C)",   x: tableX + 250 },
+                { label: "PCT (D)",     x: tableX + 330 },
+                { label: "DEDUCT (F)",  x: tableX + 400 },
+                { label: "PAY kW (H)",  x: tableX + 485 },
+                { label: "TOTAL DUE",   x: tableX + 570 },
+                { label: "ARREARS",     x: tableX + 660 },
                 { label: "FINAL TOTAL", x: tableX + 750 },
             ];
             cols.forEach(col => ctx.fillText(col.label, col.x, 212));
@@ -379,23 +421,23 @@
                 ctx.fillStyle = idx % 2 === 0 ? "#f8fafc" : "#ffffff";
                 ctx.fillRect(tableX + 20, yPos - 18, tableW - 40, 38);
 
-                const net = document.getElementById(`net-${idx}`).textContent;
-                const pct = document.getElementById(`pct-${idx}`).textContent;
-                const deduct = document.getElementById(`deduct-${idx}`).textContent;
-                const paykw = document.getElementById(`paykw-${idx}`).textContent;
-                const cost = document.getElementById(`cost-${idx}`).textContent;
+                const curr       = document.getElementById(`curr-${idx}`).value || "—";
+                const prev       = document.getElementById(`prev-${idx}`).value || "—";
+                const net        = document.getElementById(`net-${idx}`).textContent;
+                const pct        = document.getElementById(`pct-${idx}`).textContent;
+                const deduct     = document.getElementById(`deduct-${idx}`).textContent;
+                const paykw      = document.getElementById(`paykw-${idx}`).textContent;
+                const cost       = document.getElementById(`cost-${idx}`).textContent;
                 const arrearsVal = document.getElementById(`arrears-${idx}`).value || "0.00";
                 const finalTotal = document.getElementById(`finaltotal-${idx}`).textContent;
-                const curr = document.getElementById(`curr-${idx}`).value || "—";
-                const prev = document.getElementById(`prev-${idx}`).value || "—";
 
                 ctx.fillStyle = "#1e293b"; ctx.font = "600 13px Inter, system-ui, sans-serif";
                 ctx.fillText(tenant.name, cols[0].x, yPos + 4);
                 ctx.font = "12px Inter, system-ui, sans-serif"; ctx.fillStyle = "#475569";
                 ctx.fillText(curr, cols[1].x, yPos + 4);
                 ctx.fillText(prev, cols[2].x, yPos + 4);
-                ctx.fillText(net, cols[3].x, yPos + 4);
-                ctx.fillText(pct, cols[4].x, yPos + 4);
+                ctx.fillText(net,  cols[3].x, yPos + 4);
+                ctx.fillText(pct,  cols[4].x, yPos + 4);
                 ctx.fillStyle = "#dc2626"; ctx.fillText(deduct, cols[5].x, yPos + 4);
                 ctx.fillStyle = "#475569"; ctx.fillText(paykw, cols[6].x, yPos + 4);
                 ctx.fillStyle = "#0f172a"; ctx.font = "bold 12px Inter, system-ui, sans-serif";
