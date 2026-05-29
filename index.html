@@ -261,7 +261,7 @@
             document.getElementById("totalAmountDisplay").textContent = totalAmount.toFixed(2);
 
             // Price per kW = Amount Due / Total Energy Consumption (A)
-            const pricePerKw = totalKw > 0 ? (amountDue / totalKw) : 0;
+            const pricePerKw = totalKw > 0 ? (totalAmount / totalKw) : 0;
             document.getElementById("pricePerKw").textContent = pricePerKw.toFixed(2);
 
             let subtotalKw = 0;
