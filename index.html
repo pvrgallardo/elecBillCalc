@@ -257,10 +257,8 @@
             const totalAmount = amountDue - billArrears;
             const totalKw     = parseFloat(document.getElementById("totalKw").value) || 0;
 
-            // Display computed total
             document.getElementById("totalAmountDisplay").textContent = totalAmount.toFixed(2);
 
-            // Price per kW = Amount Due / Total Energy Consumption (A)
             const pricePerKw = totalKw > 0 ? (totalAmount / totalKw) : 0;
             document.getElementById("pricePerKw").textContent = pricePerKw.toFixed(2);
 
@@ -324,11 +322,12 @@
             const totalAmountDisp = document.getElementById("totalAmountDisplay").textContent || "0.00";
             const totalKw         = document.getElementById("totalKw").value || "0.0";
             const pricePerKw      = document.getElementById("pricePerKw").innerText || "0.00";
+            const excessKwVal     = document.getElementById("excessKw").textContent || "0.00";
 
             const canvas = document.createElement("canvas");
             const ctx = canvas.getContext("2d");
             canvas.width = 1300;
-            canvas.height = 660;
+            canvas.height = 710;
 
             ctx.fillStyle = "#f8fafc";
             ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -346,9 +345,9 @@
             ctx.fillText("Fully synchronized with your spreadsheet logic and formulas.", 45, 88);
 
             ctx.fillStyle = "#ffffff";
-            ctx.fillRect(20, 130, 340, 500);
+            ctx.fillRect(20, 130, 340, 550);
             ctx.strokeStyle = "#e2e8f0"; ctx.lineWidth = 1;
-            ctx.strokeRect(20, 130, 340, 500);
+            ctx.strokeRect(20, 130, 340, 550);
             ctx.fillStyle = "#0f172a";
             ctx.font = "bold 16px Inter, system-ui, sans-serif";
             ctx.fillText("Invoice Details", 40, 165);
@@ -390,11 +389,12 @@
             ctx.fillStyle = "#4f46e5"; ctx.font = "bold 13px Inter, system-ui, sans-serif";
             ctx.fillText(`Price per kW (G):   ₱ ${pricePerKw}`, 55, 582);
 
+            // --- RIGHT TABLE PANEL ---
             const tableX = 380;
             const tableW = canvas.width - tableX - 20;
             ctx.fillStyle = "#ffffff";
-            ctx.fillRect(tableX, 130, tableW, 500);
-            ctx.strokeStyle = "#e2e8f0"; ctx.strokeRect(tableX, 130, tableW, 500);
+            ctx.fillRect(tableX, 130, tableW, 550);
+            ctx.strokeStyle = "#e2e8f0"; ctx.strokeRect(tableX, 130, tableW, 550);
             ctx.fillStyle = "#0f172a"; ctx.font = "bold 16px Inter, system-ui, sans-serif";
             ctx.fillText("Calculations Breakdown", tableX + 20, 165);
 
@@ -448,6 +448,7 @@
                 ctx.fillStyle = "#065f46"; ctx.fillText(finalTotal, cols[9].x, yPos + 4);
             });
 
+            // --- subTotal (B) row ---
             const subtotalY = 260 + (initialTenants.length * 45) + 15;
             ctx.fillStyle = "#f1f5f9";
             ctx.fillRect(tableX + 20, subtotalY - 18, tableW - 40, 38);
@@ -465,6 +466,22 @@
             ctx.fillText(document.getElementById("subtotalArrears").textContent, cols[8].x, subtotalY + 4);
             ctx.fillStyle = "#065f46"; ctx.font = "bold 13px Inter, system-ui, sans-serif";
             ctx.fillText(document.getElementById("subtotalFinalTotal").textContent, cols[9].x, subtotalY + 4);
+
+            // --- Total kW Excess (E) row ---
+            const excessY = subtotalY + 48;
+            ctx.fillStyle = "#fef9c3";
+            ctx.fillRect(tableX + 20, excessY - 18, tableW - 40, 38);
+            // Left border accent
+            ctx.fillStyle = "#f59e0b";
+            ctx.fillRect(tableX + 20, excessY - 18, 4, 38);
+            // Label
+            ctx.fillStyle = "#78350f"; ctx.font = "bold 12px Inter, system-ui, sans-serif";
+            ctx.fillText("Total kW Excess (E):", cols[0].x, excessY + 4);
+            ctx.fillStyle = "#92400e"; ctx.font = "bold 13px Inter, system-ui, sans-serif";
+            ctx.fillText(excessKwVal, cols[3].x, excessY + 4);
+            // Note text
+            ctx.fillStyle = "#a16207"; ctx.font = "italic 11px Inter, system-ui, sans-serif";
+            ctx.fillText("= subTotal (B) − Total Consumption (A)", cols[4].x, excessY + 4);
 
             const link = document.createElement("a");
             link.download = `electric-bill-${invNo}-${billingMonth || "draft"}.png`;
