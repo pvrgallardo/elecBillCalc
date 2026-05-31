@@ -311,17 +311,24 @@
         }
 
         function saveInvoiceScreenshot() {
+            // Helper: format numbers with commas (e.g. 1234.56 → "1,234.56")
+            const fmt = (val) => {
+                const num = parseFloat(val);
+                if (isNaN(num)) return val;
+                return num.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            };
+
             const invNo           = document.getElementById("invoiceNo").value || "N/A";
             const billingMonth    = document.getElementById("billingMonth").value || "N/A";
             const transDate       = document.getElementById("transDate").value || "N/A";
             const dueDate         = document.getElementById("dueDate").value || "N/A";
             const periodFrom      = document.getElementById("periodFrom").value || "N/A";
             const periodTo        = document.getElementById("periodTo").value || "N/A";
-            const amountDue       = document.getElementById("amountDue").value || "0.00";
-            const billArrears     = document.getElementById("billArrears").value || "0.00";
-            const totalAmountDisp = document.getElementById("totalAmountDisplay").textContent || "0.00";
+            const amountDue       = fmt(document.getElementById("amountDue").value || "0");
+            const billArrears     = fmt(document.getElementById("billArrears").value || "0");
+            const totalAmountDisp = fmt(document.getElementById("totalAmountDisplay").textContent || "0");
             const totalKw         = document.getElementById("totalKw").value || "0.0";
-            const pricePerKw      = document.getElementById("pricePerKw").innerText || "0.00";
+            const pricePerKw      = fmt(document.getElementById("pricePerKw").innerText || "0");
             const excessKwVal     = document.getElementById("excessKw").textContent || "0.00";
 
             const canvas = document.createElement("canvas");
@@ -425,11 +432,11 @@
                 const prev       = document.getElementById(`prev-${idx}`).value || "—";
                 const net        = document.getElementById(`net-${idx}`).textContent;
                 const pct        = document.getElementById(`pct-${idx}`).textContent;
-                const deduct     = document.getElementById(`deduct-${idx}`).textContent;
+                const deduct     = fmt(document.getElementById(`deduct-${idx}`).textContent);
                 const paykw      = document.getElementById(`paykw-${idx}`).textContent;
-                const cost       = document.getElementById(`cost-${idx}`).textContent;
-                const arrearsVal = document.getElementById(`arrears-${idx}`).value || "0.00";
-                const finalTotal = document.getElementById(`finaltotal-${idx}`).textContent;
+                const cost       = fmt(document.getElementById(`cost-${idx}`).textContent);
+                const arrearsVal = fmt(document.getElementById(`arrears-${idx}`).value || "0");
+                const finalTotal = fmt(document.getElementById(`finaltotal-${idx}`).textContent);
 
                 ctx.fillStyle = "#1e293b"; ctx.font = "600 13px Inter, system-ui, sans-serif";
                 ctx.fillText(tenant.name, cols[0].x, yPos + 4);
@@ -443,7 +450,7 @@
                 ctx.fillStyle = "#0f172a"; ctx.font = "bold 12px Inter, system-ui, sans-serif";
                 ctx.fillText(cost, cols[7].x, yPos + 4);
                 ctx.fillStyle = "#fef3c7"; ctx.fillRect(cols[8].x - 4, yPos - 14, 85, 30);
-                ctx.fillStyle = "#92400e"; ctx.fillText(parseFloat(arrearsVal).toFixed(2), cols[8].x, yPos + 4);
+                ctx.fillStyle = "#92400e"; ctx.fillText(arrearsVal, cols[8].x, yPos + 4);
                 ctx.fillStyle = "#d1fae5"; ctx.fillRect(cols[9].x - 4, yPos - 14, 100, 30);
                 ctx.fillStyle = "#065f46"; ctx.fillText(finalTotal, cols[9].x, yPos + 4);
             });
@@ -458,28 +465,25 @@
             ctx.fillText(document.getElementById("subtotalKw").textContent, cols[3].x, subtotalY + 4);
             ctx.fillStyle = "#475569";
             ctx.fillText(document.getElementById("subtotalPercent").textContent, cols[4].x, subtotalY + 4);
-            ctx.fillText(document.getElementById("subtotalDeduct").textContent, cols[5].x, subtotalY + 4);
+            ctx.fillText(fmt(document.getElementById("subtotalDeduct").textContent), cols[5].x, subtotalY + 4);
             ctx.fillText(document.getElementById("subtotalPaymentKw").textContent, cols[6].x, subtotalY + 4);
             ctx.fillStyle = "#1e40af";
-            ctx.fillText(document.getElementById("subtotalCost").textContent, cols[7].x, subtotalY + 4);
+            ctx.fillText(fmt(document.getElementById("subtotalCost").textContent), cols[7].x, subtotalY + 4);
             ctx.fillStyle = "#92400e";
-            ctx.fillText(document.getElementById("subtotalArrears").textContent, cols[8].x, subtotalY + 4);
+            ctx.fillText(fmt(document.getElementById("subtotalArrears").textContent), cols[8].x, subtotalY + 4);
             ctx.fillStyle = "#065f46"; ctx.font = "bold 13px Inter, system-ui, sans-serif";
-            ctx.fillText(document.getElementById("subtotalFinalTotal").textContent, cols[9].x, subtotalY + 4);
+            ctx.fillText(fmt(document.getElementById("subtotalFinalTotal").textContent), cols[9].x, subtotalY + 4);
 
             // --- Total kW Excess (E) row ---
             const excessY = subtotalY + 48;
             ctx.fillStyle = "#fef9c3";
             ctx.fillRect(tableX + 20, excessY - 18, tableW - 40, 38);
-            // Left border accent
             ctx.fillStyle = "#f59e0b";
             ctx.fillRect(tableX + 20, excessY - 18, 4, 38);
-            // Label
             ctx.fillStyle = "#78350f"; ctx.font = "bold 12px Inter, system-ui, sans-serif";
             ctx.fillText("Total kW Excess (E):", cols[0].x, excessY + 4);
             ctx.fillStyle = "#92400e"; ctx.font = "bold 13px Inter, system-ui, sans-serif";
             ctx.fillText(excessKwVal, cols[3].x, excessY + 4);
-            // Note text
             ctx.fillStyle = "#a16207"; ctx.font = "italic 11px Inter, system-ui, sans-serif";
             ctx.fillText("= subTotal (B) − Total Consumption (A)", cols[4].x, excessY + 4);
 
