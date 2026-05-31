@@ -154,6 +154,13 @@
     <script>
         const initialTenants = [{ name: "Mama" }, { name: "Vhal" }, { name: "Liza" }, { name: "Erwin" }];
 
+        // Global formatter: adds commas + 2 decimal places
+        const fmt = (val) => {
+            const num = parseFloat(val);
+            if (isNaN(num)) return val;
+            return num.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        };
+
         function saveToLocalStorage() {
             const data = {
                 invoiceNo: document.getElementById("invoiceNo").value,
@@ -257,10 +264,9 @@
             const totalAmount = amountDue - billArrears;
             const totalKw     = parseFloat(document.getElementById("totalKw").value) || 0;
 
-            document.getElementById("totalAmountDisplay").textContent = totalAmount.toFixed(2);
-
-            const pricePerKw = totalKw > 0 ? (totalAmount / totalKw) : 0;
-            document.getElementById("pricePerKw").textContent = pricePerKw.toFixed(2);
+            // Left panel displays with commas
+            document.getElementById("totalAmountDisplay").textContent = fmt(totalAmount);
+            document.getElementById("pricePerKw").textContent = fmt(totalKw > 0 ? totalAmount / totalKw : 0);
 
             let subtotalKw = 0;
             const tenantConsumptions = initialTenants.map((_, idx) => {
@@ -270,6 +276,8 @@
                 subtotalKw += net;
                 return net;
             });
+
+            const pricePerKw = totalKw > 0 ? totalAmount / totalKw : 0;
 
             document.getElementById("subtotalKw").textContent = subtotalKw.toFixed(2);
 
@@ -296,28 +304,21 @@
 
                 document.getElementById(`net-${idx}`).textContent        = netKw.toFixed(2);
                 document.getElementById(`pct-${idx}`).textContent        = `${(pct * 100).toFixed(1)}%`;
-                document.getElementById(`deduct-${idx}`).textContent     = deduct.toFixed(2);
+                document.getElementById(`deduct-${idx}`).textContent     = fmt(deduct);
                 document.getElementById(`paykw-${idx}`).textContent      = paymentKw.toFixed(2);
-                document.getElementById(`cost-${idx}`).textContent       = tenantCost.toFixed(2);
-                document.getElementById(`finaltotal-${idx}`).textContent = finalTotal.toFixed(2);
+                document.getElementById(`cost-${idx}`).textContent       = fmt(tenantCost);
+                document.getElementById(`finaltotal-${idx}`).textContent = fmt(finalTotal);
             });
 
-            document.getElementById("subtotalDeduct").textContent      = sumDeduct.toFixed(2);
+            document.getElementById("subtotalDeduct").textContent      = fmt(sumDeduct);
             document.getElementById("subtotalPaymentKw").textContent   = sumPaymentKw.toFixed(2);
-            document.getElementById("subtotalCost").textContent        = sumCost.toFixed(2);
+            document.getElementById("subtotalCost").textContent        = fmt(sumCost);
             document.getElementById("subtotalPercent").textContent     = `${(sumPercent * 100).toFixed(1)}%`;
-            document.getElementById("subtotalArrears").textContent     = sumArrears.toFixed(2);
-            document.getElementById("subtotalFinalTotal").textContent  = sumFinalTotal.toFixed(2);
+            document.getElementById("subtotalArrears").textContent     = fmt(sumArrears);
+            document.getElementById("subtotalFinalTotal").textContent  = fmt(sumFinalTotal);
         }
 
         function saveInvoiceScreenshot() {
-            // Helper: format numbers with commas (e.g. 1234.56 → "1,234.56")
-            const fmt = (val) => {
-                const num = parseFloat(val);
-                if (isNaN(num)) return val;
-                return num.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-            };
-
             const invNo           = document.getElementById("invoiceNo").value || "N/A";
             const billingMonth    = document.getElementById("billingMonth").value || "N/A";
             const transDate       = document.getElementById("transDate").value || "N/A";
@@ -326,9 +327,9 @@
             const periodTo        = document.getElementById("periodTo").value || "N/A";
             const amountDue       = fmt(document.getElementById("amountDue").value || "0");
             const billArrears     = fmt(document.getElementById("billArrears").value || "0");
-            const totalAmountDisp = fmt(document.getElementById("totalAmountDisplay").textContent || "0");
+            const totalAmountDisp = document.getElementById("totalAmountDisplay").textContent || "0.00";
             const totalKw         = document.getElementById("totalKw").value || "0.0";
-            const pricePerKw      = fmt(document.getElementById("pricePerKw").innerText || "0");
+            const pricePerKw      = document.getElementById("pricePerKw").innerText || "0.00";
             const excessKwVal     = document.getElementById("excessKw").textContent || "0.00";
 
             const canvas = document.createElement("canvas");
@@ -432,11 +433,11 @@
                 const prev       = document.getElementById(`prev-${idx}`).value || "—";
                 const net        = document.getElementById(`net-${idx}`).textContent;
                 const pct        = document.getElementById(`pct-${idx}`).textContent;
-                const deduct     = fmt(document.getElementById(`deduct-${idx}`).textContent);
+                const deduct     = document.getElementById(`deduct-${idx}`).textContent;
                 const paykw      = document.getElementById(`paykw-${idx}`).textContent;
-                const cost       = fmt(document.getElementById(`cost-${idx}`).textContent);
+                const cost       = document.getElementById(`cost-${idx}`).textContent;
                 const arrearsVal = fmt(document.getElementById(`arrears-${idx}`).value || "0");
-                const finalTotal = fmt(document.getElementById(`finaltotal-${idx}`).textContent);
+                const finalTotal = document.getElementById(`finaltotal-${idx}`).textContent;
 
                 ctx.fillStyle = "#1e293b"; ctx.font = "600 13px Inter, system-ui, sans-serif";
                 ctx.fillText(tenant.name, cols[0].x, yPos + 4);
@@ -465,14 +466,14 @@
             ctx.fillText(document.getElementById("subtotalKw").textContent, cols[3].x, subtotalY + 4);
             ctx.fillStyle = "#475569";
             ctx.fillText(document.getElementById("subtotalPercent").textContent, cols[4].x, subtotalY + 4);
-            ctx.fillText(fmt(document.getElementById("subtotalDeduct").textContent), cols[5].x, subtotalY + 4);
+            ctx.fillText(document.getElementById("subtotalDeduct").textContent, cols[5].x, subtotalY + 4);
             ctx.fillText(document.getElementById("subtotalPaymentKw").textContent, cols[6].x, subtotalY + 4);
             ctx.fillStyle = "#1e40af";
-            ctx.fillText(fmt(document.getElementById("subtotalCost").textContent), cols[7].x, subtotalY + 4);
+            ctx.fillText(document.getElementById("subtotalCost").textContent, cols[7].x, subtotalY + 4);
             ctx.fillStyle = "#92400e";
-            ctx.fillText(fmt(document.getElementById("subtotalArrears").textContent), cols[8].x, subtotalY + 4);
+            ctx.fillText(document.getElementById("subtotalArrears").textContent, cols[8].x, subtotalY + 4);
             ctx.fillStyle = "#065f46"; ctx.font = "bold 13px Inter, system-ui, sans-serif";
-            ctx.fillText(fmt(document.getElementById("subtotalFinalTotal").textContent), cols[9].x, subtotalY + 4);
+            ctx.fillText(document.getElementById("subtotalFinalTotal").textContent, cols[9].x, subtotalY + 4);
 
             // --- Total kW Excess (E) row ---
             const excessY = subtotalY + 48;
